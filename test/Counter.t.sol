@@ -1,24 +1,16 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-import {Test, console2} from "forge-std/Test.sol";
-import {Counter} from "../src/Counter.sol";
+import { Base_Test } from "test/Base.t.sol";
+import { console } from "forge-std/console.sol";
+import "test/utils/Constants.sol";
 
-contract CounterTest is Test {
-    Counter public counter;
-
+contract CounterTest is Base_Test {
     function setUp() public {
-        counter = new Counter();
-        counter.setNumber(0);
+        _setUp();
     }
 
-    function test_Increment() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
-    }
+    function _setUp() internal virtual {}
 
-    function testFuzz_SetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
-    }
+    // function _createFolk() internal virtual {}
 }
