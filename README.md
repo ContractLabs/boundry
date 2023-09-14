@@ -1,4 +1,4 @@
-## foundry-template-3coor
+## foundry-template-bacoor
 
 # Install dependencies
 
