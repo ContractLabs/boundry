@@ -1,4 +1,4 @@
-## foundry-template-bacoor
+## foundry-template-3coor
 
 # Install dependencies
 
@@ -12,6 +12,7 @@ forge clean
 
 # Deploy script
 
+source .env
 forge script script/<script contract>:<contract name> --rpc-url $<rpc-constant-env> --json deployment/<contract name>.json --broadcast --verify -vvvv
 
 
