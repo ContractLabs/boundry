@@ -110,7 +110,7 @@ tasibii - [@telegram](https://t.me/tasiby) - [@email](mailto:tuanhawork@gmail.co
 
 * [Solidity](https://soliditylang.org/)
 * [Foundry](https://book.getfoundry.sh/)
-* [Bash](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html)
+* [Shell]()
 
 [Foundry.com]: https://avatars.githubusercontent.com/u/99892494?s=200&v=4
 [Foundry-url]: https://getfoundry.sh/
