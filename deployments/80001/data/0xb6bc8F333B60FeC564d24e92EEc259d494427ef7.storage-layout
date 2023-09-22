@@ -1,0 +1,5 @@
+| Name          | Type    | Slot | Offset | Bytes | Contract                                                  |
+|---------------|---------|------|--------|-------|-----------------------------------------------------------|
+| _initialized  | uint8   | 0    | 0      | 1     | src/example/CounterUpgradeableV2.sol:CounterUpgradeableV2 |
+| _initializing | bool    | 0    | 1      | 1     | src/example/CounterUpgradeableV2.sol:CounterUpgradeableV2 |
+| number        | uint256 | 1    | 0      | 32    | src/example/CounterUpgradeableV2.sol:CounterUpgradeableV2 |

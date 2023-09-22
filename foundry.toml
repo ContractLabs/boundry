@@ -1,19 +1,19 @@
 [profile.default]
-  auto_detect_solc = false
-  block_timestamp = 1_680_220_800 # March 31, 2023 at 00:00 GMT
-  bytecode_hash = "none"
-  cbor_metadata = false
+  solc = "0.8.19"
   evm_version = "paris"
-  fuzz = { runs = 1_000 }
+  auto_detect_solc = false
   gas_reports = ["*"]
-  libs = ["lib"]
+  bytecode_hash = "none"
+  fuzz = { runs = 1_000 }
   optimizer = true
   optimizer_runs = 10_000
+  block_timestamp = 1_680_220_800 # March 31, 2023 at 00:00 GMT
   out = "out"
-  script = "script"
-  solc = "0.8.19"
   src = "src"
   test = "test"
+  libs = ["lib"]
+  script = "script"
+  fs_permissions = [{ access = "read-write", path = "./"}]
 
 [profile.ci]
   fuzz = { runs = 10_000 }
@@ -22,7 +22,7 @@
 [fmt]
   bracket_spacing = true
   int_types = "long"
-  line_length = 120
+  line_length = 80
   multiline_func_header = "all"
   number_underscore = "thousands"
   quote_style = "double"

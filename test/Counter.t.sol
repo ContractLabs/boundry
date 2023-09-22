@@ -10,7 +10,7 @@ contract CounterTest is Base_Test {
         _setUp();
     }
 
-    function _setUp() internal virtual {}
+    function _setUp() internal virtual { }
 
     // function _createFolk() internal virtual {}
 }

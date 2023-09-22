@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "test/Counter.t.sol";
 
-import { Counter } from "src/Counter.sol";
+import { Counter } from "src/example/Counter.sol";
 
 contract TestCounter is CounterTest {
     Counter public counter;
