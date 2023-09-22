@@ -1,7 +1,0 @@
-| Name          | Type        | Slot | Offset | Bytes | Contract                                              |
-|---------------|-------------|------|--------|-------|-------------------------------------------------------|
-| _initialized  | uint8       | 0    | 0      | 1     | src/example/CounterUpgradeable.sol:CounterUpgradeable |
-| _initializing | bool        | 0    | 1      | 1     | src/example/CounterUpgradeable.sol:CounterUpgradeable |
-| __gap         | uint256[50] | 1    | 0      | 1600  | src/example/CounterUpgradeable.sol:CounterUpgradeable |
-| __gap         | uint256[50] | 51   | 0      | 1600  | src/example/CounterUpgradeable.sol:CounterUpgradeable |
-| number        | uint256     | 101  | 0      | 32    | src/example/CounterUpgradeable.sol:CounterUpgradeable |
