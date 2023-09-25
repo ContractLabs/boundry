@@ -30,7 +30,7 @@ contract BaseScript is Script, UtilsScript {
     /**
      * @dev Override when your contract name and contract file name is mismatch.
      */
-    function contractFile() public virtual returns (string memory) { }
+    function contractFile() public view virtual returns (string memory) { }
 
     /**
      * @dev Deploy non-proxy contract
