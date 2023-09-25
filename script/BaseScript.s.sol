@@ -123,7 +123,7 @@ contract BaseScript is Script, UtilsScript {
         Proxy(proxy).upgradeToAndCall(newImplementation, data);
     }
 
-    function _prefixName(string memory name) internal returns (string memory) {
+    function _prefixName(string memory name) internal view returns (string memory) {
         if (abi.encodePacked(contractFile()).length != 0) {
             return string.concat(contractFile(), ":", name);
         }
