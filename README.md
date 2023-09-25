@@ -56,7 +56,7 @@ To get a local copy up and running follow these simple example steps.
 ### Prerequisites
 
 * Install foundry
-  ```sh
+  ```bash
   curl -L https://foundry.paradigm.xyz | bash
   ```
 * More details at: [Foundry installation](https://book.getfoundry.sh/getting-started/installation) 
@@ -64,23 +64,50 @@ To get a local copy up and running follow these simple example steps.
 ### Installation
 
 1. Clone the repo
-   ```sh
+   ```bash
    git clone https://github.com/ContractLabs/template-foundry.git
    ```
 2. Install dependencies packages
-   ```sh
+   ```bash
    sh sh/setup.sh
    ```
-3. Remappings
+   or
+   ```bash
+   forge install
+   ```
+4. Remappings
    ```bash
    forge remappings > remappings.txt
    ```
-
+   Note: After remappings remember change import path in BaseScript follow your remappings.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-1. Deploy
-2. Upgrade
+Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS and Transparent.
+
+1. Example
+   ```Solidity
+   contract CounterScript is BaseScript {
+       function run() public {
+          vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+          address deployment = _deployRaw("ERC20", abi.encodeCall(ERC20.initialize, "TokenName", "TokenSymbol"));
+          vm.stopBroadcast();
+       }
+   }
+   ```
+2. Note
+   - Must override ```admin()``` function in your script.
+   ```Solidity
+   function admin() public view override returns (address) {
+      return vm.addr(vm.envUint("YOUR_PRIVATE_KEY"));
+   }
+   ```
+   - Must override ```contractFile()``` function if your contract file name and contract name is mismatch.
+   ```Solidity
+   function contractFile() public view override returns (string memory) {
+      return "ERC20.sol";
+   }
+   ```
    
 Follow the example and it will work :)
 
@@ -110,7 +137,7 @@ tasibii - [@telegram](https://t.me/tasiby) - [@email](mailto:tuanhawork@gmail.co
 
 * [Solidity](https://soliditylang.org/)
 * [Foundry](https://book.getfoundry.sh/)
-* [Shell]()
+* [Bash]()
 
 [Foundry.com]: https://avatars.githubusercontent.com/u/99892494?s=200&v=4
 [Foundry-url]: https://getfoundry.sh/
