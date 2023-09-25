@@ -60,7 +60,7 @@ To get a local copy up and running follow these simple example steps.
   curl -L https://foundry.paradigm.xyz | bash
   ```
 * More details at: [Foundry installation](https://book.getfoundry.sh/getting-started/installation) 
-
+* Shell recommended: Bash
 ### Installation
 
 1. Clone the repo
