@@ -6,6 +6,8 @@ import { Initializable } from
 
 contract CounterUpgradeableV2 is Initializable {
     uint256 public number;
+    string public greeting;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
 
     constructor() {
@@ -14,6 +16,10 @@ contract CounterUpgradeableV2 is Initializable {
 
     function initialize(uint256 number_) public initializer {
         setNumber(number_);
+    }
+
+    function setGreeting(string memory greeting_) public {
+        greeting = greeting_;
     }
 
     function setNumber(uint256 newNumber) public {
