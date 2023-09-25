@@ -95,14 +95,36 @@ Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS
        }
    }
    ```
-2. Note
-   - Must override ```admin()``` function in your script.
+2. Dependencies packages recommended 
+   ```bash
+   forge install --no-commit vectorized/solady
+   forge install --no-commit PaulRBerg/prb-math
+   forge install --no-commit foundry-rs/forge-std
+   forge install --no-commit transmissions11/solmate
+   forge install --no-commit openzeppelin/openzeppelin-contracts
+   forge install --no-commit openzeppelin/openzeppelin-contracts-upgradeable
+   ```
+3. Script run guide
+   
+   Don't forget run this command first
+   ```bash
+   source .env
+   ```
+   Run script command:
+   ```bash
+   forge script script/<script file name>.s.sol --rpc-url $<CHAIN-RPC-URL> --etherscan-api-key $<YOUR-API-KEY> --broadcast --verify --legacy --ffi -vvvv
+   ```
+4. Note
+   
+   Must include option ```--ffi``` in your command run script.
+   
+   Must override ```admin()``` function in your script.
    ```Solidity
    function admin() public view override returns (address) {
       return vm.addr(vm.envUint("YOUR_PRIVATE_KEY"));
    }
    ```
-   - Must override ```contractFile()``` function if your contract file name and contract name is mismatch.
+   Must override ```contractFile()``` function if your contract file name and contract name is mismatch.
    ```Solidity
    function contractFile() public view override returns (string memory) {
       return "ERC20.sol";
