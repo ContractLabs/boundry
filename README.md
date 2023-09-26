@@ -8,7 +8,8 @@
   </a>
 
 <h3 align="center">minimal foundry template</h3>
-  <p align="center"><img src="https://gifdb.com/images/high/pop-cat-roblox-dance-tk63wxpjc2t2lag8.gif" width="300" height="300"/></p>
+  <p align="center"><img src="https://gifdb.com/images/high/pop-cat-roblox-dance-tk63wxpjc2t2lag8.gif" width="150" height="150"/></p>
+  <p align="center">A minimal custom foundry template with deploy, upgrade base script.</p>
   <p align="center">
     <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
     ·
@@ -22,9 +23,6 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
@@ -40,9 +38,6 @@
 
 
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
-A minimal custom foundry template with deploy, upgrade base script.
 
 
 <!-- GETTING STARTED -->
@@ -128,20 +123,6 @@ Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS
       return "ERC20.sol";
    }
    ```
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 
 <!-- CONTACT -->
