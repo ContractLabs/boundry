@@ -7,11 +7,9 @@
     <img src="https://avatars.githubusercontent.com/u/99892494?s=200&v=4" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Foundry custom template</h3>
-
+<h3 align="center">minimal foundry template</h3>
+  <p align="center"><img src="https://gifdb.com/images/high/pop-cat-roblox-dance-tk63wxpjc2t2lag8.gif" width="300" height="300"/></p>
   <p align="center">
-    <br />
-    <br />
     <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
     ·
     <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
@@ -44,7 +42,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-A Foundry-custom template for developing Solidity smart contracts, with base script use for deploy, upgrade contract.
+A minimal custom foundry template with deploy, upgrade base script.
 
 
 <!-- GETTING STARTED -->
@@ -60,7 +58,7 @@ To get a local copy up and running follow these simple example steps.
   curl -L https://foundry.paradigm.xyz | bash
   ```
 * More details at: [Foundry installation](https://book.getfoundry.sh/getting-started/installation) 
-* Shell recommended: Bash
+* Shell setup at: [Shell autocompletion](https://book.getfoundry.sh/config/shell-autocompletion)
 ### Installation
 
 1. Clone the repo
