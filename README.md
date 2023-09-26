@@ -130,18 +130,6 @@ Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS
       return "ERC20.sol";
    }
    ```
-   If you have this error ```File import callback not supported```. Try import this configuration to .vscode/settings.json
-   ```json
-    "[solidity]": {
-      "editor.formatOnSave": true,
-    },
-
-    "solidity.formatter": "forge",
-    "solidity.compileUsingRemoteVersion": "v0.8.20+commit.a1b79de6",
-    "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "lib",
-   ```
-   
 
 <!-- CONTRIBUTING -->
 ## Contributing
