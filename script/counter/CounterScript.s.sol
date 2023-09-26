@@ -21,14 +21,15 @@ contract CounterScript is BaseScript {
 
     function deployUups() public {
         address payable proxy =
-            _deployProxyRaw("CounterUpgradeable", abi.encodeCall(CounterUpgradeable.initialize, 0), "uups");
+            _deployProxyRaw(type(CounterUpgradeable).name, abi.encodeCall(CounterUpgradeable.initialize, 0), "uups");
         CounterUpgradeable deployment = CounterUpgradeable(proxy);
         console2.log(address(deployment));
     }
 
     function deployTransparent() public {
-        address payable proxy =
-            _deployProxyRaw("CounterUpgradeableV2", abi.encodeCall(CounterUpgradeableV2.initialize, 0), "transparent");
+        address payable proxy = _deployProxyRaw(
+            type(CounterUpgradeableV2).name, abi.encodeCall(CounterUpgradeableV2.initialize, 0), "transparent"
+        );
         CounterUpgradeableV2 deployment = CounterUpgradeableV2(proxy);
         console2.log(address(deployment));
     }
@@ -36,13 +37,13 @@ contract CounterScript is BaseScript {
     function upgradeTo() public {
         address oldImplement = 0xA9437Fa76D419ba70Ede3A15F3f5d184c6c5D312;
         address proxy = 0x21377e21D53A387aBc1485D9B96b7F322fc39352;
-        _upgradeTo(proxy, oldImplement, "CounterUpgradeableV2");
+        _upgradeTo(proxy, oldImplement, type(CounterUpgradeableV2).name);
     }
 
     function upgradeToAndCall() public {
         address oldImplement = 0xA9437Fa76D419ba70Ede3A15F3f5d184c6c5D312;
         address proxy = 0x21377e21D53A387aBc1485D9B96b7F322fc39352;
         bytes memory data;
-        _upgradeToAndCall(proxy, oldImplement, "CounterUpgradeableV2", data);
+        _upgradeToAndCall(proxy, oldImplement, type(CounterUpgradeableV2).name, data);
     }
 }
