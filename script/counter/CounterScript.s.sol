@@ -20,21 +20,15 @@ contract CounterScript is BaseScript {
     }
 
     function deployUups() public {
-        address payable proxy = _deployProxyRaw(
-            "CounterUpgradeable",
-            abi.encodeCall(CounterUpgradeable.initialize, 0),
-            "uups"
-        );
+        address payable proxy =
+            _deployProxyRaw("CounterUpgradeable", abi.encodeCall(CounterUpgradeable.initialize, 0), "uups");
         CounterUpgradeable deployment = CounterUpgradeable(proxy);
         console2.log(address(deployment));
     }
 
     function deployTransparent() public {
-        address payable proxy = _deployProxyRaw(
-            "CounterUpgradeableV2",
-            abi.encodeCall(CounterUpgradeableV2.initialize, 0),
-            "transparent"
-        );
+        address payable proxy =
+            _deployProxyRaw("CounterUpgradeableV2", abi.encodeCall(CounterUpgradeableV2.initialize, 0), "transparent");
         CounterUpgradeableV2 deployment = CounterUpgradeableV2(proxy);
         console2.log(address(deployment));
     }

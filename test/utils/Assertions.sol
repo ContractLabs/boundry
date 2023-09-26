@@ -23,14 +23,7 @@ abstract contract Assertions is PRBTest, PRBMathAssertions {
     /// with the error message `err`.
     /// Works by comparing the `keccak256` hashes of the arrays, which is faster
     /// than iterating over the elements.
-    function assertEq(
-        uint96[] memory a,
-        uint96[] memory b,
-        string memory err
-    )
-        internal
-        virtual
-    {
+    function assertEq(uint96[] memory a, uint96[] memory b, string memory err) internal virtual {
         if (!(keccak256(abi.encode(a)) == keccak256(abi.encode(b)))) {
             emit PRBTest.LogNamedString("Error", err);
             assertEq(a, b);

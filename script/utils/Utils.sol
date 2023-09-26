@@ -7,13 +7,7 @@ contract UtilsScript is Script {
     mapping(string => bool) __madeDir;
     mapping(uint256 => mapping(address => bool)) __storageLayoutGenerated;
 
-    function _storageLayoutLog(
-        string memory contractName,
-        address implement,
-        uint256 chainId
-    )
-        internal
-    {
+    function _storageLayoutLog(string memory contractName, address implement, uint256 chainId) internal {
         if (__storageLayoutGenerated[chainId][implement]) return;
 
         _mkdir(_basePath(string.concat("storage/", vm.toString(chainId))));
@@ -52,31 +46,19 @@ contract UtilsScript is Script {
         if (diff.length == 0) {
             console2.log(unicode"\nCollision check status: Pass ✅");
             console2.log("\nContract name: %s", contractName);
-            console2.log(
-                "\nOld: %s <-> New: %s", oldImplementation, newImplementation
-            );
+            console2.log("\nOld: %s <-> New: %s", oldImplementation, newImplementation);
         } else {
             console2.log(unicode"\nCollision check status: Fail ❌");
             console2.log("\nContract name: %s", contractName);
-            console2.log(
-                "\nOld: %s <-> New: %s", oldImplementation, newImplementation
-            );
+            console2.log("\nOld: %s <-> New: %s", oldImplementation, newImplementation);
             console2.log("\n%s\n", string(diff));
-            revert(
-                "Contract storage layout changed and might not be compatible."
-            );
+            revert("Contract storage layout changed and might not be compatible.");
         }
 
         _rmrf(_getTemporaryStorageLayoutPath(newImplementation));
     }
 
-    function _headOf(
-        string memory lineNum,
-        address target,
-        uint256 chainId
-    )
-        internal
-    {
+    function _headOf(string memory lineNum, address target, uint256 chainId) internal {
         _mkdir(_basePath("temp/"));
 
         string[] memory script = new string[](4);
@@ -89,13 +71,7 @@ contract UtilsScript is Script {
         vm.writeFile(_getTemporaryStorageLayoutPath(target), string(out));
     }
 
-    function _lineOf(
-        address target,
-        uint256 chainId
-    )
-        internal
-        returns (string memory)
-    {
+    function _lineOf(address target, uint256 chainId) internal returns (string memory) {
         string memory path = _getStorageLayoutPath(target, chainId);
 
         if (!_exist(path)) {
@@ -146,40 +122,17 @@ contract UtilsScript is Script {
         } catch { }
     }
 
-    function _basePath(string memory path)
-        internal
-        pure
-        returns (string memory)
-    {
+    function _basePath(string memory path) internal pure returns (string memory) {
         return string.concat("deployments/", path);
     }
 
-    function _getStorageLayoutPath(
-        address implementation,
-        uint256 chainId
-    )
-        internal
-        pure
-        returns (string memory)
-    {
+    function _getStorageLayoutPath(address implementation, uint256 chainId) internal pure returns (string memory) {
         return _basePath(
-            string.concat(
-                "storage/",
-                vm.toString(chainId),
-                "/",
-                vm.toString(implementation),
-                ".storage-layout"
-            )
+            string.concat("storage/", vm.toString(chainId), "/", vm.toString(implementation), ".storage-layout")
         );
     }
 
-    function _getTemporaryStorageLayoutPath(address implementation)
-        internal
-        pure
-        returns (string memory)
-    {
-        return _basePath(
-            string.concat("temp/", vm.toString(implementation), ".temp")
-        );
+    function _getTemporaryStorageLayoutPath(address implementation) internal pure returns (string memory) {
+        return _basePath(string.concat("temp/", vm.toString(implementation), ".temp"));
     }
 }

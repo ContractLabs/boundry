@@ -3,52 +3,43 @@ pragma solidity ^0.8.20;
 
 import { UtilsScript } from "./utils/Utils.sol";
 import { Script, console2 } from "forge-std/Script.sol";
-import { ERC1967Proxy } from
-    "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { TransparentUpgradeableProxy } from
-    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 interface Proxy {
     function upgradeTo(address newImplementation) external;
-    function upgradeToAndCall(
-        address newImplementation,
-        bytes memory data
-    )
-        external;
+    function upgradeToAndCall(address newImplementation, bytes memory data) external;
 }
 
 contract BaseScript is Script, UtilsScript {
     bytes internal constant EMPTY_PARAMS = "";
 
     /**
-     * @dev Override when deploy contract with transparent proxy to passing
-     * admin
-     * for upgradeable feature.
+     * * @dev Identify the admin of the transparent proxy contract.
+     * * for upgradeable feature
+     *
+     * ! This must be overridden when deploying with a transparent proxy.
      */
     function admin() public view virtual returns (address) { }
 
     /**
-     * @dev Override when your contract name and contract file name is mismatch.
+     * * @dev Replace the contract file, including the file extension.
+     *
+     * ! This must be overridden when your contract name and contract file name do not match.
      */
     function contractFile() public view virtual returns (string memory) { }
 
     /**
-     * @dev Deploy non-proxy contract
+     * @dev Deploy a non-proxy contract and return the deployed address.
      */
-    function _deployRaw(
-        string memory contractName,
-        bytes memory args
-    )
-        internal
-        returns (address)
-    {
+    function _deployRaw(string memory contractName, bytes memory args) internal returns (address) {
         address deployment = deployCode(_prefixName(contractName), args);
         vm.label(deployment, contractName);
         return deployment;
     }
 
     /**
-     * @dev Deploy proxy contract
+     * @dev Deploy a proxy contract and return the address of the deployed payable proxy.
      */
     function _deployProxyRaw(
         string memory contractName,
@@ -59,18 +50,13 @@ contract BaseScript is Script, UtilsScript {
         returns (address payable)
     {
         address payable proxy;
-        address implementation =
-            deployCode(_prefixName(contractName), EMPTY_PARAMS);
+        address implementation = deployCode(_prefixName(contractName), EMPTY_PARAMS);
 
         if (_strEquals(kind, "uups")) {
             proxy = payable(address(new ERC1967Proxy(implementation, args)));
         }
         if (_strEquals(kind, "transparent")) {
-            proxy = payable(
-                address(
-                    new TransparentUpgradeableProxy(implementation, admin(), args)
-                )
-            );
+            proxy = payable(address(new TransparentUpgradeableProxy(implementation, admin(), args)));
         }
         if (!_strEquals(kind, "uups") && !_strEquals(kind, "transparent")) {
             revert("Proxy type not currently supported");
@@ -85,26 +71,17 @@ contract BaseScript is Script, UtilsScript {
     }
 
     /**
-     * @dev Using in case upgrade new logic
+     * @dev Utilized in the event of upgrading to new logic.
      */
-    function _upgradeTo(
-        address proxy,
-        address oldImplementation,
-        string memory contractName
-    )
-        internal
-    {
-        address newImplementation =
-            deployCode(_prefixName(contractName), EMPTY_PARAMS);
+    function _upgradeTo(address proxy, address oldImplementation, string memory contractName) internal {
+        address newImplementation = deployCode(_prefixName(contractName), EMPTY_PARAMS);
         _storageLayoutLog(contractName, newImplementation, block.chainid);
-        _collisionCheck(
-            contractName, oldImplementation, newImplementation, block.chainid
-        );
+        _collisionCheck(contractName, oldImplementation, newImplementation, block.chainid);
         Proxy(proxy).upgradeTo(newImplementation);
     }
 
     /**
-     * @dev Using in case upgrade new logic with data
+     * @dev Utilized in the event of upgrading to new logic, along with associated data.
      */
     function _upgradeToAndCall(
         address proxy,
@@ -114,12 +91,9 @@ contract BaseScript is Script, UtilsScript {
     )
         internal
     {
-        address newImplementation =
-            deployCode(_prefixName(contractName), EMPTY_PARAMS);
+        address newImplementation = deployCode(_prefixName(contractName), EMPTY_PARAMS);
         _storageLayoutLog(contractName, newImplementation, block.chainid);
-        _collisionCheck(
-            contractName, oldImplementation, newImplementation, block.chainid
-        );
+        _collisionCheck(contractName, oldImplementation, newImplementation, block.chainid);
         Proxy(proxy).upgradeToAndCall(newImplementation, data);
     }
 
@@ -130,15 +104,7 @@ contract BaseScript is Script, UtilsScript {
         return string.concat(name, ".sol:", name);
     }
 
-    function _strEquals(
-        string memory str1,
-        string memory str2
-    )
-        internal
-        pure
-        returns (bool)
-    {
-        return keccak256(abi.encodePacked(str1))
-            == keccak256(abi.encodePacked(str2));
+    function _strEquals(string memory str1, string memory str2) internal pure returns (bool) {
+        return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
     }
 }
