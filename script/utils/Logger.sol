@@ -106,9 +106,6 @@ contract LoggerScript is Script {
                 keyAvailable = (item.children()[i].key()).replace('"', "");
             }
         }
-
-        if (_areStringsEqual(keyAvailable, "")) revert("Storage key not found.");
-        else return keyAvailable;
     }
 
     function _getContractDataByOption(
@@ -135,9 +132,6 @@ contract LoggerScript is Script {
                 impl = vm.parseAddress(item.children()[i].children()[0].value());
             }
         }
-
-        if (impl == address(0)) revert("Implementation address not found.");
-        else return impl;
     }
 
     function _getContractAddress(string memory contractName, uint256 chainId) internal view returns (address) {
@@ -158,9 +152,6 @@ contract LoggerScript is Script {
                 storageLayout = item.children()[i].children()[1];
             }
         }
-
-        if (storageLayout.size() == 0) revert("Storage layout not found.");
-        else return storageLayout;
     }
 
     function _getLatestStorageLayoutKey(JSONParserLib.Item memory item) internal pure returns (string memory key) {
@@ -171,9 +162,6 @@ contract LoggerScript is Script {
                 key = item.children()[i].children()[1].key().replace('"', "");
             }
         }
-
-        if (_areStringsEqual(key, "")) revert("Storage key not found.");
-        else return key;
     }
 
     function _getPreviousLatestStorageLayout(JSONParserLib.Item memory item)
@@ -188,9 +176,6 @@ contract LoggerScript is Script {
                 storageLayout = item.children()[i - 1].children()[1];
             }
         }
-
-        if (storageLayout.size() == 0) revert("Storage layout not found.");
-        else return storageLayout;
     }
 
     function _overrideNullStorageLayout(string memory path) internal {
