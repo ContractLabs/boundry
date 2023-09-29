@@ -24,15 +24,6 @@ contract LoggerScript is Script {
         __chainName[421_613] = "arbitrum-testnet";
     }
 
-    function run() public {
-        _deploymentLogs(
-            0xf543747650D81042FE61BE4Fe861311D1865C8e8,
-            0xf343747650D81042fE61BE4FE861311D1865C8e8,
-            "CounterUpgradeable",
-            56
-        );
-    }
-
     function _deploymentLogs(
         address proxy,
         address implementation,
@@ -60,13 +51,59 @@ contract LoggerScript is Script {
         // proxy logs
         else {
             if (!vm.isFile(filePath)) {
-                string memory init =
-                    string.concat('{"proxy": "', vm.toString(proxy), '", "implementations": ', format, '}');
+                string memory init = string.concat(
+                    '{"proxy": "',
+                    vm.toString(proxy),
+                    '", "implementations": {',
+                    '"0": {},',
+                    '"1": {},',
+                    '"2": {},',
+                    '"3": {},',
+                    '"4": {},',
+                    '"5": {},',
+                    '"6": {},',
+                    '"7": {},',
+                    '"8": {},',
+                    '"9": {},',
+                    '"10": {},',
+                    '"11": {},',
+                    '"12": {},',
+                    '"13": {},',
+                    '"14": {},',
+                    '"15": {},',
+                    '"16": {},',
+                    '"17": {},',
+                    '"18": {},',
+                    '"19": {},',
+                    '"20": {},',
+                    '"21": {},',
+                    '"22": {},',
+                    '"23": {},',
+                    '"24": {},',
+                    '"25": {},',
+                    '"26": {},',
+                    '"27": {},',
+                    '"28": {},',
+                    '"29": {},',
+                    '"30": {}',
+                    '}}'
+                );
                 vm.writeJson(init, filePath);
+                vm.writeJson(format, filePath, string.concat(".implementations.0"));
             } else {
-                string memory newData =
-                    string.concat('{', _getOldImplementations(contractName, chainId), ",", format, '}');
-                vm.writeJson(_cleanString(newData), filePath, ".implementations");
+                vm.writeJson(format, filePath, string.concat(".implementations.", _getKeyAvailable(filePath)));
+            }
+        }
+    }
+
+    function _getKeyAvailable(string memory filePath) internal returns (string memory) {
+        string memory json = vm.readFile(filePath);
+        JSONParserLib.Item memory item = json.parse().children()[1];
+        uint256 length = item.size();
+
+        for (uint256 i; i < length; ++i) {
+            if (_areStringsEqual(item.children()[i].value(), "{}")) {
+                return (item.children()[i].key()).replace('"', "");
             }
         }
     }
@@ -87,19 +124,61 @@ contract LoggerScript is Script {
         return string(out);
     }
 
-    function _getOldImplementations(
-        string memory contractName,
-        uint256 chainId
-    )
-        internal
-        view
-        returns (string memory)
-    {
-        JSONParserLib.Item memory item;
-        string memory fileContent = vm.readFile(_getContractLogPath(contractName, chainId));
-        item = fileContent.parse();
+    function _getLatestImplementation(JSONParserLib.Item memory item) internal returns (address) {
+        uint256 length = item.size();
 
-        return item.children()[1].value();
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                return vm.parseAddress(item.children()[i].children()[0].value());
+            }
+        }
+    }
+
+    function _getContractAddress(string memory contractName, uint256 chainId) internal returns (address) {
+        string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
+        JSONParserLib.Item memory item = json.parse();
+        return vm.parseAddress(item.children()[0].value());
+    }
+
+    function _getLatestStorageLayout(JSONParserLib.Item memory item) internal returns (JSONParserLib.Item memory) {
+        uint256 length = item.size();
+
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                return item.children()[i].children()[1];
+            }
+        }
+    }
+
+    function _getLatestStorageLayoutKey(JSONParserLib.Item memory item) internal returns (string memory) {
+        uint256 length = item.size();
+
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                return item.children()[i].children()[1].key().replace('"', "");
+            }
+        }
+    }
+
+    function _getPreviousLatestStorageLayout(JSONParserLib.Item memory item)
+        internal
+        returns (JSONParserLib.Item memory)
+    {
+        uint256 length = item.size();
+
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                return item.children()[i - 1].children()[1];
+            }
+        }
+    }
+
+    function _overrideNullStorageLayout(string memory path) internal {
+        JSONParserLib.Item memory item = vm.readFile(path).parse();
+        string memory key = _getLatestStorageLayoutKey(item);
+        console2.log("====KEY====", key);
+
+        vm.writeJson("{}", path, string.concat(".implementations.", key));
     }
 
     function _baseFormatJson(address implementation, string memory contractName) internal returns (string memory) {
@@ -125,10 +204,6 @@ contract LoggerScript is Script {
         return base;
     }
 
-    function _cleanString(string memory target) internal pure returns (string memory) {
-        return target.replace("\n", "").replace(" ", "");
-    }
-
     function _mkdir(string memory path) internal {
         string[] memory script = new string[](3);
         script[0] = "mkdir";
@@ -143,6 +218,19 @@ contract LoggerScript is Script {
         script[1] = fromPath;
         script[2] = destPath;
         vm.ffi(script);
+    }
+
+    function _rmrf(string memory path) internal {
+        string[] memory script = new string[](3);
+        script[0] = "rm";
+        script[1] = "-rf";
+        script[2] = path;
+
+        vm.ffi(script);
+    }
+
+    function _areStringsEqual(string memory firstStr, string memory secondStr) internal pure returns (bool) {
+        return keccak256(abi.encodePacked(firstStr)) == keccak256(abi.encodePacked(secondStr));
     }
 
     function _getDeploymentsPath(string memory path) internal pure returns (string memory) {

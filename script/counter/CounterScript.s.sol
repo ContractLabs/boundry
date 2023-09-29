@@ -10,7 +10,7 @@ contract CounterScript is BaseScript {
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
         // deployUups();
         // deployTransparent();
-        // upgradeTo();
+        upgradeTo();
         // upgradeToAndCall();
         vm.stopBroadcast();
     }
@@ -35,15 +35,13 @@ contract CounterScript is BaseScript {
     }
 
     function upgradeTo() public {
-        address oldImplement = 0xA9437Fa76D419ba70Ede3A15F3f5d184c6c5D312;
-        address proxy = 0x21377e21D53A387aBc1485D9B96b7F322fc39352;
-        _upgradeTo(proxy, oldImplement, type(CounterUpgradeableV2).name);
+        address proxy = 0x49eff41D93BF0185E82B95851A7616f131672742;
+        _upgradeTo(proxy, type(CounterUpgradeableV2).name);
     }
 
     function upgradeToAndCall() public {
-        address oldImplement = 0xA9437Fa76D419ba70Ede3A15F3f5d184c6c5D312;
         address proxy = 0x21377e21D53A387aBc1485D9B96b7F322fc39352;
         bytes memory data;
-        _upgradeToAndCall(proxy, oldImplement, type(CounterUpgradeableV2).name, data);
+        _upgradeToAndCall(proxy, type(CounterUpgradeableV2).name, data);
     }
 }

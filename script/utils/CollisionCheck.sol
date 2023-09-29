@@ -1,34 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { Script, console2 } from "forge-std/Script.sol";
+import { console2, LoggerScript } from "script/utils/Logger.sol";
 import { JSONParserLib } from "solady/src/utils/JSONParserLib.sol";
 
-contract CollisionCheck is Script {
+contract CollisionCheck is LoggerScript {
     using JSONParserLib for *;
 
-    function run() public {
-        checkForCollision("test.json", "test2.json");
-    }
+    function _checkForCollision(string memory contractName, uint256 chainId) internal returns (bool) {
+        string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
+        JSONParserLib.Item memory item = json.parse().children()[1];
 
-    function checkForCollision(string memory path1, string memory path2) internal returns (bool) {
-        JSONParserLib.Item memory item1 = getStorageLayoutItems(path1);
-        JSONParserLib.Item memory item2 = getStorageLayoutItems(path2);
-
-        if (!areStringsEqual(item1.at('"contract"').value(), item2.at('"contract"').value())) {
-            return false;
-        }
+        JSONParserLib.Item memory item1 = _getPreviousLatestStorageLayout(item);
+        JSONParserLib.Item memory item2 = _getLatestStorageLayout(item);
 
         for (uint256 i; i < item2.children()[0].size(); ++i) {
             string memory offset = item2.children()[0].children()[i].children()[3].value();
             string memory storageSlot = item2.children()[0].children()[i].children()[4].value();
             string memory typeKey = item2.children()[0].children()[i].children()[5].value();
             string memory numOfBytes = item2.children()[1].at(typeKey).at('"numberOfBytes"').value();
-
-            if (hasConflict(item1, offset, storageSlot, numOfBytes)) {
+            if (_hasConflict(item1, offset, storageSlot, numOfBytes)) {
                 console2.log(
                     string.concat(
-                        "\n-----------------------------------------------Upcoming implemented storage layout-----------------------------------------------",
+                        "\n------------------------------------------------Upcoming implemented storage layout-----------------------------------------------",
                         "\nName: ",
                         item2.children()[0].children()[i].children()[2].value(),
                         "\nOffset: ",
@@ -37,14 +31,16 @@ contract CollisionCheck is Script {
                         typeKey,
                         "\nBytes: ",
                         numOfBytes,
-                        "\n================================================================================================================================"
+                        "\n=================================================================================================================================="
                     )
                 );
+                return false;
             }
+            return true;
         }
     }
 
-    function hasConflict(
+    function _hasConflict(
         JSONParserLib.Item memory item,
         string memory offset,
         string memory storageSlot,
@@ -60,8 +56,8 @@ contract CollisionCheck is Script {
             string memory _typeKey = item.children()[0].children()[i].children()[5].value();
             string memory _numOfBytes = item.children()[1].at(_typeKey).at('"numberOfBytes"').value();
 
-            if (areStringsEqual(storageSlot, _storageSlot) && areStringsEqual(offset, _offset)) {
-                if (!areStringsEqual(numOfBytes, _numOfBytes)) {
+            if (_areStringsEqual(storageSlot, _storageSlot) && _areStringsEqual(offset, _offset)) {
+                if (!_areStringsEqual(numOfBytes, _numOfBytes)) {
                     console2.log(
                         string.concat(
                             "\n| Slot: ",
@@ -83,14 +79,5 @@ contract CollisionCheck is Script {
             }
         }
         return false;
-    }
-
-    function getStorageLayoutItems(string memory jsonPath) internal view returns (JSONParserLib.Item memory) {
-        string memory contents = vm.readFile(jsonPath);
-        return contents.parse().children()[2];
-    }
-
-    function areStringsEqual(string memory str1, string memory str2) internal pure returns (bool) {
-        return keccak256(abi.encodePacked(str1)) == keccak256(abi.encodePacked(str2));
     }
 }

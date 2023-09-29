@@ -10,4 +10,7 @@
     "solidity.packageDefaultDependenciesDirectory": "lib",
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
     "solidity.compileUsingRemoteVersion": "v0.8.20",
+    "cSpell.words": [
+        "solady"
+    ],
 }
