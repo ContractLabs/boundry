@@ -8,6 +8,8 @@ contract CollisionCheck is LoggerScript {
     using JSONParserLib for *;
 
     function _checkForCollision(string memory contractName, uint256 chainId) internal returns (bool) {
+        if (!vm.isFile(_getContractLogPath(contractName, chainId))) revert("Deployment contract log file not found.");
+
         string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
         JSONParserLib.Item memory item = json.parse().children()[1];
 
