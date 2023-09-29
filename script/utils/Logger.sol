@@ -96,16 +96,19 @@ contract LoggerScript is Script {
         }
     }
 
-    function _getKeyAvailable(string memory filePath) internal returns (string memory) {
+    function _getKeyAvailable(string memory filePath) internal view returns (string memory keyAvailable) {
         string memory json = vm.readFile(filePath);
         JSONParserLib.Item memory item = json.parse().children()[1];
         uint256 length = item.size();
 
         for (uint256 i; i < length; ++i) {
             if (_areStringsEqual(item.children()[i].value(), "{}")) {
-                return (item.children()[i].key()).replace('"', "");
+                keyAvailable = (item.children()[i].key()).replace('"', "");
             }
         }
+
+        if (_areStringsEqual(keyAvailable, "")) revert("Storage key not found.");
+        else return keyAvailable;
     }
 
     function _getContractDataByOption(
@@ -124,60 +127,75 @@ contract LoggerScript is Script {
         return string(out);
     }
 
-    function _getLatestImplementation(JSONParserLib.Item memory item) internal returns (address) {
+    function _getLatestImplementation(JSONParserLib.Item memory item) internal pure returns (address impl) {
         uint256 length = item.size();
 
         for (uint256 i = length - 1; i >= 0; --i) {
             if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                return vm.parseAddress(item.children()[i].children()[0].value());
+                impl = vm.parseAddress(item.children()[i].children()[0].value());
             }
         }
+
+        if (impl == address(0)) revert("Implementation address not found.");
+        else return impl;
     }
 
-    function _getContractAddress(string memory contractName, uint256 chainId) internal returns (address) {
+    function _getContractAddress(string memory contractName, uint256 chainId) internal view returns (address) {
         string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
         JSONParserLib.Item memory item = json.parse();
         return vm.parseAddress(item.children()[0].value());
     }
 
-    function _getLatestStorageLayout(JSONParserLib.Item memory item) internal returns (JSONParserLib.Item memory) {
-        uint256 length = item.size();
-
-        for (uint256 i = length - 1; i >= 0; --i) {
-            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                return item.children()[i].children()[1];
-            }
-        }
-    }
-
-    function _getLatestStorageLayoutKey(JSONParserLib.Item memory item) internal returns (string memory) {
-        uint256 length = item.size();
-
-        for (uint256 i = length - 1; i >= 0; --i) {
-            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                return item.children()[i].children()[1].key().replace('"', "");
-            }
-        }
-    }
-
-    function _getPreviousLatestStorageLayout(JSONParserLib.Item memory item)
+    function _getLatestStorageLayout(JSONParserLib.Item memory item)
         internal
-        returns (JSONParserLib.Item memory)
+        pure
+        returns (JSONParserLib.Item memory storageLayout)
     {
         uint256 length = item.size();
 
         for (uint256 i = length - 1; i >= 0; --i) {
             if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                return item.children()[i - 1].children()[1];
+                storageLayout = item.children()[i].children()[1];
             }
         }
+
+        if (storageLayout.size() == 0) revert("Storage layout not found.");
+        else return storageLayout;
+    }
+
+    function _getLatestStorageLayoutKey(JSONParserLib.Item memory item) internal pure returns (string memory key) {
+        uint256 length = item.size();
+
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                key = item.children()[i].children()[1].key().replace('"', "");
+            }
+        }
+
+        if (_areStringsEqual(key, "")) revert("Storage key not found.");
+        else return key;
+    }
+
+    function _getPreviousLatestStorageLayout(JSONParserLib.Item memory item)
+        internal
+        pure
+        returns (JSONParserLib.Item memory storageLayout)
+    {
+        uint256 length = item.size();
+
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                storageLayout = item.children()[i - 1].children()[1];
+            }
+        }
+
+        if (storageLayout.size() == 0) revert("Storage layout not found.");
+        else return storageLayout;
     }
 
     function _overrideNullStorageLayout(string memory path) internal {
         JSONParserLib.Item memory item = vm.readFile(path).parse();
         string memory key = _getLatestStorageLayoutKey(item);
-        console2.log("====KEY====", key);
-
         vm.writeJson("{}", path, string.concat(".implementations.", key));
     }
 
