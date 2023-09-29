@@ -38,8 +38,8 @@ contract CollisionCheck is LoggerScript {
                 );
                 return false;
             }
-            return true;
         }
+        return true;
     }
 
     function _hasConflict(
