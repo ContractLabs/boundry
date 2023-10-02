@@ -8,7 +8,7 @@ contract CollisionCheck is LoggerScript {
     using JSONParserLib for *;
 
     function _checkForCollision(string memory contractName, uint256 chainId) internal returns (bool) {
-        if (!vm.isFile(_getContractLogPath(contractName, chainId))) revert("Deployment contract log file not found.");
+        if (!_fileExists(_getContractLogPath(contractName, chainId))) revert("Deployment contract log file not found.");
 
         string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
         JSONParserLib.Item memory item = json.parse().children()[1];
@@ -24,7 +24,9 @@ contract CollisionCheck is LoggerScript {
             if (_hasConflict(item1, offset, storageSlot, numOfBytes)) {
                 console2.log(
                     string.concat(
-                        "\n------------------------------------------------Upcoming implemented storage layout-----------------------------------------------",
+                        "\n==========================",
+                        "\nUpcoming storage layout",
+                        "\n--------------------------",
                         "\nName: ",
                         item2.children()[0].children()[i].children()[2].value(),
                         "\nOffset: ",
@@ -33,7 +35,7 @@ contract CollisionCheck is LoggerScript {
                         typeKey,
                         "\nBytes: ",
                         numOfBytes,
-                        "\n=================================================================================================================================="
+                        "\n=========================="
                     )
                 );
                 return false;
@@ -65,7 +67,9 @@ contract CollisionCheck is LoggerScript {
                             "\n| Slot: ",
                             _storageSlot,
                             " |",
-                            "\n------------------------------------------------Current implemented storage layout------------------------------------------------",
+                            "\n==========================",
+                            "\nCurrent storage layout",
+                            "\n--------------------------",
                             "\nName: ",
                             item.children()[0].children()[i].children()[2].value(),
                             "\nOffset: ",
@@ -81,5 +85,18 @@ contract CollisionCheck is LoggerScript {
             }
         }
         return false;
+    }
+
+    function _diff() internal {
+        console2.log("\n==========================", "\nDiff", "\n==========================\n");
+
+        string[] memory script = new string[](4);
+
+        script[0] = "diff";
+        script[1] = "-y";
+        script[2] = _getTemporaryStoragePath("previous.storage-layout");
+        script[3] = _getTemporaryStoragePath("latest.storage-layout");
+
+        console2.log(string(vm.ffi(script)));
     }
 }
