@@ -64,7 +64,6 @@ contract BaseScript is CollisionCheck {
         if (!_areStringsEqual(kind, "uups") && !_areStringsEqual(kind, "transparent")) {
             revert("Proxy type not currently supported");
         }
-
         _deploymentLogs(proxy, implementation, contractName, block.chainid);
 
         vm.label(implementation, string.concat("Logic-", contractName));
@@ -76,29 +75,76 @@ contract BaseScript is CollisionCheck {
     /**
      * @dev Utilized in the event of upgrading to new logic.
      */
-    function _upgradeTo(address proxy, string memory contractName) internal {
-        address newImplementation = deployCode(_prefixName(contractName), EMPTY_PARAMS);
+    function _upgradeTo(address proxy, string memory contractName, bool skip) internal {
+        address sender = vm.addr(vm.envUint("PRIVATE_KEY"));
+        address newImplementation = computeCreateAddress(sender, uint256(vm.getNonce(sender)));
+
         _deploymentLogs(proxy, newImplementation, contractName, block.chainid);
-        bool success = _checkForCollision(contractName, block.chainid);
-        if (success) {
+        _storageLayoutTemp(_getContractLogPath(contractName, block.chainid));
+
+        if (skip) {
+            address deployed = deployCode(_prefixName(contractName), EMPTY_PARAMS);
+            if (deployed != newImplementation) revert("Wrong address.");
             Proxy(proxy).upgradeTo(newImplementation);
         } else {
+            _diff();
+
+            bool success = _checkForCollision(contractName, block.chainid);
+            // show diff log:
+            if (success) {
+                console2.log("\n==========================", unicode"\nAuto compatibility check: ✅ Passed");
+            } else {
+                console2.log("\n==========================", unicode"\nAuto compatibility check: ❌ Failed");
+            }
+
+            console2.log(
+                "\n==========================",
+                "\nIf you sure storage slot not collision. ",
+                "\nSet assign true to skip variable"
+            );
+
             _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
         }
+
+        _rmrf(_getTemporaryStoragePath(""));
     }
 
     /**
      * @dev Utilized in the event of upgrading to new logic, along with associated data.
      */
-    function _upgradeToAndCall(address proxy, string memory contractName, bytes memory data) internal {
-        address newImplementation = deployCode(_prefixName(contractName), EMPTY_PARAMS);
+    function _upgradeToAndCall(address proxy, string memory contractName, bytes memory data, bool skip) internal {
+        address sender = vm.addr(vm.envUint("PRIVATE_KEY"));
+        address newImplementation = computeCreateAddress(sender, uint256(vm.getNonce(sender)));
+
         _deploymentLogs(proxy, newImplementation, contractName, block.chainid);
-        bool success = _checkForCollision(contractName, block.chainid);
-        if (success) {
+        _storageLayoutTemp(_getContractLogPath(contractName, block.chainid));
+
+        if (skip) {
+            address deployed = deployCode(_prefixName(contractName), EMPTY_PARAMS);
+            if (deployed != newImplementation) revert("Wrong address.");
             Proxy(proxy).upgradeToAndCall(newImplementation, data);
         } else {
+            _diff();
+
+            bool success = _checkForCollision(contractName, block.chainid);
+            // show diff log:
+            if (success) {
+                console2.log("\n==========================", unicode"\nAuto compatibility check: ✅ Passed");
+            } else {
+                console2.log("\n==========================", unicode"\nAuto compatibility check: ❌ Failed");
+            }
+            console2.log("\n==========================");
+            console2.log(
+                unicode"\n ❗️",
+                "\nIf you sure storage slot not collision. ",
+                "\nAssign the value true to the skip param.",
+                "\n=========================="
+            );
+
             _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
         }
+
+        _rmrf(_getTemporaryStoragePath(""));
     }
 
     function _prefixName(string memory name) internal view returns (string memory) {
