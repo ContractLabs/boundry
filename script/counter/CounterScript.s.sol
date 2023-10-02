@@ -10,7 +10,7 @@ contract CounterScript is BaseScript {
         vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
         // deployUups();
         // deployTransparent();
-        upgradeTo();
+        upgradeTo(true);
         // upgradeToAndCall();
         vm.stopBroadcast();
     }
@@ -23,7 +23,6 @@ contract CounterScript is BaseScript {
         address payable proxy =
             _deployProxyRaw(type(CounterUpgradeable).name, abi.encodeCall(CounterUpgradeable.initialize, 0), "uups");
         CounterUpgradeable deployment = CounterUpgradeable(proxy);
-        console2.log(address(deployment));
     }
 
     function deployTransparent() public {
@@ -31,17 +30,16 @@ contract CounterScript is BaseScript {
             type(CounterUpgradeableV2).name, abi.encodeCall(CounterUpgradeableV2.initialize, 0), "transparent"
         );
         CounterUpgradeableV2 deployment = CounterUpgradeableV2(proxy);
-        console2.log(address(deployment));
     }
 
-    function upgradeTo() public {
-        address proxy = 0x49eff41D93BF0185E82B95851A7616f131672742;
-        _upgradeTo(proxy, type(CounterUpgradeableV2).name);
+    function upgradeTo(bool skip) public {
+        address proxy = 0x8C55dAD338C0c04A8B4F52224bA8D2DDeA430338;
+        _upgradeTo(proxy, type(CounterUpgradeableV2).name, skip);
     }
 
-    function upgradeToAndCall() public {
+    function upgradeToAndCall(bool skip) public {
         address proxy = 0x21377e21D53A387aBc1485D9B96b7F322fc39352;
         bytes memory data;
-        _upgradeToAndCall(proxy, type(CounterUpgradeableV2).name, data);
+        _upgradeToAndCall(proxy, type(CounterUpgradeableV2).name, data, skip);
     }
 }

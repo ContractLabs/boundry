@@ -4,8 +4,18 @@ pragma solidity ^0.8.13;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract CounterUpgradeableV2 is Initializable {
+    struct C {
+        uint256 a;
+        bool b;
+        bool aaaaa;
+        address cd;
+        bytes32 c;
+    }
+
     uint256 public number;
     string public greeting;
+
+    C public c;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
 
