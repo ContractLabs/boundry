@@ -32,16 +32,14 @@ contract LoggerScript is Script {
     )
         internal
     {
-        if (!vm.isDir(_getChainFolderPath(chainId, ""))) {
-            _mkdir(_getChainFolderPath(chainId, ""));
-        }
+        _mkdir(_getChainFolderPath(chainId, ""));
 
         string memory filePath = _getContractLogPath(contractName, chainId);
         string memory format = _baseFormatJson(implementation, contractName);
 
         // non-proxy logs
         if (proxy == address(0)) {
-            if (vm.isFile(filePath)) {
+            if (_fileExists(filePath)) {
                 _mv(
                     filePath, string.concat(filePath, _getContractLogPath(string.concat(contractName, "-old"), chainId))
                 );
@@ -50,7 +48,7 @@ contract LoggerScript is Script {
         }
         // proxy logs
         else {
-            if (!vm.isFile(filePath)) {
+            if (!_fileExists(filePath)) {
                 string memory init = string.concat(
                     '{"proxy": "',
                     vm.toString(proxy),
@@ -96,6 +94,21 @@ contract LoggerScript is Script {
         }
     }
 
+    function _storageLayoutTemp(string memory filePath) internal {
+        _mkdir(_getTemporaryStoragePath(""));
+        string memory json = vm.readFile(filePath);
+        JSONParserLib.Item memory item = json.parse();
+        vm.writeFile(
+            _getTemporaryStoragePath("latest.storage-layout"), _getLatestStorageLayout(item.children()[1]).value()
+        );
+        vm.writeLine(_getTemporaryStoragePath("latest.storage-layout"), "");
+        vm.writeFile(
+            _getTemporaryStoragePath("previous.storage-layout"),
+            _getPreviousLatestStorageLayout(item.children()[1]).value()
+        );
+        vm.writeLine(_getTemporaryStoragePath("previous.storage-layout"), "");
+    }
+
     function _getKeyAvailable(string memory filePath) internal view returns (string memory keyAvailable) {
         string memory json = vm.readFile(filePath);
         JSONParserLib.Item memory item = json.parse().children()[1];
@@ -103,7 +116,7 @@ contract LoggerScript is Script {
 
         for (uint256 i; i < length; ++i) {
             if (_areStringsEqual(item.children()[i].value(), "{}")) {
-                keyAvailable = (item.children()[i].key()).replace('"', "");
+                return item.children()[i].key().replace('"', "");
             }
         }
     }
@@ -129,7 +142,7 @@ contract LoggerScript is Script {
 
         for (uint256 i = length - 1; i >= 0; --i) {
             if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                impl = vm.parseAddress(item.children()[i].children()[0].value());
+                return vm.parseAddress(item.children()[i].children()[0].value());
             }
         }
     }
@@ -149,7 +162,7 @@ contract LoggerScript is Script {
 
         for (uint256 i = length - 1; i >= 0; --i) {
             if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                storageLayout = item.children()[i].children()[1];
+                return item.children()[i].children()[1];
             }
         }
     }
@@ -159,7 +172,7 @@ contract LoggerScript is Script {
 
         for (uint256 i = length - 1; i >= 0; --i) {
             if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                key = item.children()[i].children()[1].key().replace('"', "");
+                return item.children()[i].children()[1].key().replace('"', "");
             }
         }
     }
@@ -173,7 +186,7 @@ contract LoggerScript is Script {
 
         for (uint256 i = length - 1; i >= 0; --i) {
             if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                storageLayout = item.children()[i - 1].children()[1];
+                return item.children()[i - 1].children()[1];
             }
         }
     }
@@ -232,6 +245,18 @@ contract LoggerScript is Script {
         vm.ffi(script);
     }
 
+    function _fileExists(string memory file) internal returns (bool exists) {
+        string[] memory script = new string[](2);
+        script[0] = "ls";
+        script[1] = file;
+
+        try vm.ffi(script) returns (bytes memory res) {
+            if (bytes(res).length != 0) {
+                exists = true;
+            }
+        } catch { }
+    }
+
     function _areStringsEqual(string memory firstStr, string memory secondStr) internal pure returns (bool) {
         return keccak256(abi.encodePacked(firstStr)) == keccak256(abi.encodePacked(secondStr));
     }
@@ -246,5 +271,9 @@ contract LoggerScript is Script {
 
     function _getContractLogPath(string memory contractName, uint256 chainId) internal view returns (string memory) {
         return _getChainFolderPath(chainId, string.concat(contractName, ".json"));
+    }
+
+    function _getTemporaryStoragePath(string memory path) internal pure returns (string memory) {
+        return string.concat("temp/", path);
     }
 }
