@@ -15,6 +15,7 @@ solc = "0.8.20"
 src = "src"
 test = "test"
 fs_permissions = [{ access = "read-write", path = "./" }]
+gas_reports_ignore = ["BaseScript"]
 
 [profile.ci]
 fuzz = { runs = 10_000 }

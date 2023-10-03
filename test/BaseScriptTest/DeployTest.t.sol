@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "test/utils/Constants.sol";
 import { console2, Test } from "forge-std/Test.sol";
 import { BaseScript } from "script/BaseScript.s.sol";
 
@@ -12,6 +11,7 @@ import { ProxyAdmin } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin
 
 contract DeployTest is Test {
     BaseScript public script;
+    bytes public constant EMPTY_PARAMS = "";
 
     function setUp() public {
         script = new BaseScript();
