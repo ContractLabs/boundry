@@ -24,6 +24,32 @@ contract LoggerScript is Script {
         __chainName[421_613] = "arbitrum-testnet";
     }
 
+    function getContractAddress(string memory contractName, uint256 chainId) public view returns (address) {
+        string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
+        JSONParserLib.Item memory item = json.parse();
+        return vm.parseAddress(item.children()[0].value().replace('"', ""));
+    }
+
+    function getLatestImplementationAddress(
+        string memory contractName,
+        uint256 chainId
+    )
+        public
+        view
+        returns (address impl)
+    {
+        string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
+        JSONParserLib.Item memory item = json.parse().children()[1];
+
+        uint256 length = item.size();
+
+        for (uint256 i = length - 1; i >= 0; --i) {
+            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
+                return vm.parseAddress(item.children()[i].children()[0].value().replace('"', ""));
+            }
+        }
+    }
+
     function _deploymentLogs(
         address proxy,
         address implementation,
@@ -41,7 +67,8 @@ contract LoggerScript is Script {
         if (proxy == address(0)) {
             if (_fileExists(filePath)) {
                 _mv(
-                    filePath, string.concat(filePath, _getContractLogPath(string.concat(contractName, "-old"), chainId))
+                    filePath,
+                    string.concat(_getContractLogPath(contractName, chainId).replace(".json", ""), "-old.json")
                 );
             }
             vm.writeJson(format, filePath);
@@ -98,10 +125,12 @@ contract LoggerScript is Script {
         _mkdir(_getTemporaryStoragePath(""));
         string memory json = vm.readFile(filePath);
         JSONParserLib.Item memory item = json.parse();
+
         vm.writeFile(
             _getTemporaryStoragePath("latest.storage-layout"), _getLatestStorageLayout(item.children()[1]).value()
         );
         vm.writeLine(_getTemporaryStoragePath("latest.storage-layout"), "");
+
         vm.writeFile(
             _getTemporaryStoragePath("previous.storage-layout"),
             _getPreviousLatestStorageLayout(item.children()[1]).value()
@@ -135,22 +164,6 @@ contract LoggerScript is Script {
         script[3] = option;
         bytes memory out = vm.ffi(script);
         return string(out);
-    }
-
-    function _getLatestImplementation(JSONParserLib.Item memory item) internal pure returns (address impl) {
-        uint256 length = item.size();
-
-        for (uint256 i = length - 1; i >= 0; --i) {
-            if (!_areStringsEqual(item.children()[i].value(), "{}")) {
-                return vm.parseAddress(item.children()[i].children()[0].value());
-            }
-        }
-    }
-
-    function _getContractAddress(string memory contractName, uint256 chainId) internal view returns (address) {
-        string memory json = vm.readFile(_getContractLogPath(contractName, chainId));
-        JSONParserLib.Item memory item = json.parse();
-        return vm.parseAddress(item.children()[0].value());
     }
 
     function _getLatestStorageLayout(JSONParserLib.Item memory item)
@@ -266,6 +279,9 @@ contract LoggerScript is Script {
     }
 
     function _getChainFolderPath(uint256 chainId, string memory path) internal view returns (string memory) {
+        if (_areStringsEqual(__chainName[chainId], "")) {
+            return _getDeploymentsPath(string.concat("default-foundry/", path));
+        }
         return _getDeploymentsPath(string.concat(__chainName[chainId], "/", path));
     }
 

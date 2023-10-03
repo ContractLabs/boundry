@@ -4,7 +4,11 @@ pragma solidity ^0.8.20;
 import { CollisionCheck } from "./utils/CollisionCheck.sol";
 import { Script, console2 } from "forge-std/Script.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ProxyAdmin } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import {
+    ITransparentUpgradeableProxy,
+    TransparentUpgradeableProxy
+} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 interface Proxy {
     function upgradeTo(address newImplementation) external;
@@ -12,15 +16,11 @@ interface Proxy {
 }
 
 contract BaseScript is CollisionCheck {
-    bytes internal constant EMPTY_PARAMS = "";
+    bytes internal constant _EMPTY_PARAMS = "";
 
-    /**
-     * * @dev Identify the admin of the transparent proxy contract.
-     * * for upgradeable feature
-     *
-     * ! This must be overridden when deploying with a transparent proxy.
-     */
-    function admin() public view virtual returns (address) { }
+    function getAdmin() public virtual returns (address) {
+        return getContractAddress(type(ProxyAdmin).name, block.chainid);
+    }
 
     /**
      * * @dev Replace the contract file, including the file extension.
@@ -32,7 +32,7 @@ contract BaseScript is CollisionCheck {
     /**
      * @dev Deploy a non-proxy contract and return the deployed address.
      */
-    function _deployRaw(string memory contractName, bytes memory args) internal returns (address) {
+    function deployRaw(string memory contractName, bytes memory args) public returns (address) {
         address deployment = deployCode(_prefixName(contractName), args);
 
         _deploymentLogs(address(0), deployment, contractName, block.chainid);
@@ -44,22 +44,22 @@ contract BaseScript is CollisionCheck {
     /**
      * @dev Deploy a proxy contract and return the address of the deployed payable proxy.
      */
-    function _deployProxyRaw(
+    function deployProxyRaw(
         string memory contractName,
         bytes memory args,
         string memory kind
     )
-        internal
+        public
         returns (address payable)
     {
         address payable proxy;
-        address implementation = deployCode(_prefixName(contractName), EMPTY_PARAMS);
+        address implementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
         if (_areStringsEqual(kind, "uups")) {
             proxy = payable(address(new ERC1967Proxy(implementation, args)));
         }
         if (_areStringsEqual(kind, "transparent")) {
-            proxy = payable(address(new TransparentUpgradeableProxy(implementation, admin(), args)));
+            proxy = payable(address(new TransparentUpgradeableProxy(implementation, getAdmin(), args)));
         }
         if (!_areStringsEqual(kind, "uups") && !_areStringsEqual(kind, "transparent")) {
             revert("Proxy type not currently supported");
@@ -75,17 +75,26 @@ contract BaseScript is CollisionCheck {
     /**
      * @dev Utilized in the event of upgrading to new logic.
      */
-    function _upgradeTo(address proxy, string memory contractName, bool skip) internal {
-        address sender = vm.addr(vm.envUint("PRIVATE_KEY"));
-        address newImplementation = computeCreateAddress(sender, uint256(vm.getNonce(sender)));
+    function upgradeTo(address proxy, string memory contractName, string memory kind, bool skip) public {
+        address preComputedAddress = _computeAddressByUpgrader();
 
-        _deploymentLogs(proxy, newImplementation, contractName, block.chainid);
+        _deploymentLogs(proxy, preComputedAddress, contractName, block.chainid);
         _storageLayoutTemp(_getContractLogPath(contractName, block.chainid));
 
         if (skip) {
-            address deployed = deployCode(_prefixName(contractName), EMPTY_PARAMS);
-            if (deployed != newImplementation) revert("Wrong address.");
-            Proxy(proxy).upgradeTo(newImplementation);
+            address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
+            if (preComputedAddress != newImplementation) {
+                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
+                revert("Wrong address.");
+            }
+            if (_areStringsEqual(kind, "uups")) {
+                Proxy(proxy).upgradeTo(newImplementation);
+            } else if (_areStringsEqual(kind, "transparent")) {
+                ProxyAdmin(getAdmin()).upgrade(ITransparentUpgradeableProxy(proxy), newImplementation);
+            } else {
+                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
+                revert("Unsupported your kind of proxy.");
+            }
         } else {
             _diff();
 
@@ -112,17 +121,37 @@ contract BaseScript is CollisionCheck {
     /**
      * @dev Utilized in the event of upgrading to new logic, along with associated data.
      */
-    function _upgradeToAndCall(address proxy, string memory contractName, bytes memory data, bool skip) internal {
-        address sender = vm.addr(vm.envUint("PRIVATE_KEY"));
-        address newImplementation = computeCreateAddress(sender, uint256(vm.getNonce(sender)));
+    function upgradeToAndCall(
+        address proxy,
+        string memory contractName,
+        bytes memory data,
+        string memory kind,
+        bool skip
+    )
+        public
+    {
+        address preComputedAddress = _computeAddressByUpgrader();
 
-        _deploymentLogs(proxy, newImplementation, contractName, block.chainid);
+        _deploymentLogs(proxy, preComputedAddress, contractName, block.chainid);
         _storageLayoutTemp(_getContractLogPath(contractName, block.chainid));
 
         if (skip) {
-            address deployed = deployCode(_prefixName(contractName), EMPTY_PARAMS);
-            if (deployed != newImplementation) revert("Wrong address.");
-            Proxy(proxy).upgradeToAndCall(newImplementation, data);
+            address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
+            if (preComputedAddress != newImplementation) {
+                _rmrf(_getTemporaryStoragePath(""));
+                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
+                revert("Wrong address.");
+            }
+
+            if (_areStringsEqual(kind, "uups")) {
+                Proxy(proxy).upgradeToAndCall(newImplementation, data);
+            } else if (_areStringsEqual(kind, "transparent")) {
+                ProxyAdmin(getAdmin()).upgradeAndCall(ITransparentUpgradeableProxy(proxy), newImplementation, data);
+            } else {
+                _rmrf(_getTemporaryStoragePath(""));
+                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
+                revert("Unsupported your kind of proxy.");
+            }
         } else {
             _diff();
 
@@ -143,7 +172,6 @@ contract BaseScript is CollisionCheck {
 
             _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
         }
-
         _rmrf(_getTemporaryStoragePath(""));
     }
 
@@ -152,5 +180,10 @@ contract BaseScript is CollisionCheck {
             return string.concat(contractFile(), ":", name);
         }
         return string.concat(name, ".sol:", name);
+    }
+
+    function _computeAddressByUpgrader() internal view returns (address) {
+        address sender = vm.addr(vm.envUint("UPGRADER_PRIVATE_KEY"));
+        return computeCreateAddress(sender, uint256(vm.getNonce(sender)));
     }
 }

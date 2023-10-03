@@ -1,22 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract CounterUpgradeableV2 is Initializable {
-    struct C {
-        uint256 a;
-        bool b;
-        bool aaaaa;
-        address cd;
-        bytes32 c;
-    }
-
+contract CounterUpgradeable is Initializable, UUPSUpgradeable {
     uint256 public number;
     string public greeting;
-
-    C public c;
-
     /// @custom:oz-upgrades-unsafe-allow constructor
 
     constructor() {
@@ -24,11 +14,8 @@ contract CounterUpgradeableV2 is Initializable {
     }
 
     function initialize(uint256 number_) public initializer {
+        __UUPSUpgradeable_init();
         setNumber(number_);
-    }
-
-    function setGreeting(string memory greeting_) public {
-        greeting = greeting_;
     }
 
     function setNumber(uint256 newNumber) public {
@@ -38,4 +25,10 @@ contract CounterUpgradeableV2 is Initializable {
     function increment() public {
         number++;
     }
+
+    function setGreeting(string memory greeting_) public {
+        greeting = greeting_;
+    }
+
+    function _authorizeUpgrade(address) internal override { }
 }
