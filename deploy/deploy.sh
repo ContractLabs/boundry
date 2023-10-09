@@ -14,9 +14,15 @@ deploy() {
         if [ -n "$proxy" ] && [ -n "$implementation" ]; then
             saveProxyContract $NETWORK $CONTRACT $proxy $implementation
         fi
+
+        echo "\nImplementation deployed at address $implementation"
+        echo "\nProxy deployed at address $proxy"
     else
         saveContract $NETWORK $CONTRACT $deployment
+        echo "\nContract deployed at address $deployment"
     fi
+
+    
 }
 
 saveContract() {

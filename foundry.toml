@@ -39,16 +39,22 @@ fuji = "${RPC_URL_FUJI}"
 mumbai = "${RPC_URL_MUMBAI}"
 tarb = "${RPC_URL_TARB}"
 # mainnet rpc endpoints
-ether = "${RPC_URL_ETHER}"
+ethereum = "${RPC_URL_ETHER}"
 bsc = "${RPC_URL_BSC}"
 avalanche = "${RPC_URL_AVALANCHE}"
 polygon = "${RPC_URL_POLYGON}"
 arbitrum = "${RPC_URL_ARBITRUM}"
 
 [etherscan]
-arbitrum = { key = "${ARBISCAN_KEY}", url = "https://api.arbiscan.io/api" }
-avalanche = { key = "${SNOWTRACE_KEY}", url = "https://api.snowtrace.io/api" }
-bsc = { key = "${BSCSCAN_KEY}", url = "https://api.bscscan.com/api" }
+# testnet
 goerli = { key = "${ETHERSCAN_KEY}", url = "https://api-goerli.etherscan.io/api" }
-ether = { key = "${ETHERSCAN_KEY}" }
+tbsc = { key = "${BSCSCAN_KEY}", url = "https://api-testnet.bscscan.com/api" }
+fuji = { key = "${SNOWTRACE_KEY}", url = "https://api-testnet.snowtrace.io/api" }
+mumbai = { key = "${POLYGONSCAN_KEY}", url = "https://api-testnet.polygonscan.com/api" }
+tarb = { key = "${ARBISCAN_KEY}", url = "https://api-goerli.arbiscan.io/api" }
+
+ethereum = { key = "${ETHERSCAN_KEY}" }
+bsc = { key = "${BSCSCAN_KEY}", url = "https://api.bscscan.com/api" }
+avalanche = { key = "${SNOWTRACE_KEY}", url = "https://api.snowtrace.io/api" }
 polygon = { key = "${POLYGONSCAN_KEY}", url = "https://api.polygonscan.com/api" }
+arbitrum = { key = "${ARBISCAN_KEY}", url = "https://api.arbiscan.io/api" }
