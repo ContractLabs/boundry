@@ -5,8 +5,17 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract CounterUpgradeable is Initializable, UUPSUpgradeable {
+    struct Admin {
+        bool isAdmin;
+        bool isSomethingElse;
+        uint8 id;
+        address walletAddress;
+    }
+
     uint256 public number;
     string public greeting;
+
+    Admin public admin;
     /// @custom:oz-upgrades-unsafe-allow constructor
 
     constructor() {
@@ -20,6 +29,10 @@ contract CounterUpgradeable is Initializable, UUPSUpgradeable {
 
     function setNumber(uint256 newNumber) public {
         number = newNumber;
+    }
+
+    function setAdmin(address addr) public {
+        admin = Admin(true, true, 0, addr);
     }
 
     function increment() public {

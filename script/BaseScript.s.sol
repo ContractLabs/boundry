@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.20;
 
-import { CollisionCheck } from "./utils/CollisionCheck.sol";
-import { Script, console2 } from "forge-std/Script.sol";
+import { console2, Logger } from "./utils/Logger.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import { ProxyAdmin } from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+
 import {
     ITransparentUpgradeableProxy,
     TransparentUpgradeableProxy
@@ -15,12 +15,10 @@ interface Proxy {
     function upgradeToAndCall(address newImplementation, bytes memory data) external;
 }
 
-contract BaseScript is CollisionCheck {
+contract BaseScript is Logger {
     bytes internal constant _EMPTY_PARAMS = "";
 
-    function getAdmin() public virtual returns (address) {
-        return getContractAddress(type(ProxyAdmin).name, block.chainid);
-    }
+    function getAdmin() public virtual returns (address) { }
 
     /**
      * * @dev Replace the contract file, including the file extension.
@@ -32,13 +30,8 @@ contract BaseScript is CollisionCheck {
     /**
      * @dev Deploy a non-proxy contract and return the deployed address.
      */
-    function deployRaw(string memory contractName, bytes memory args) public returns (address) {
-        address deployment = deployCode(_prefixName(contractName), args);
-
-        _deploymentLogs(address(0), deployment, contractName, block.chainid);
-
-        vm.label(deployment, contractName);
-        return deployment;
+    function deployRaw(string memory contractName, bytes memory args) public returns (address deployment) {
+        deployment = deployCode(_prefixName(contractName), args);
     }
 
     /**
@@ -50,10 +43,9 @@ contract BaseScript is CollisionCheck {
         string memory kind
     )
         public
-        returns (address payable)
+        returns (address implementation, address payable proxy)
     {
-        address payable proxy;
-        address implementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
+        implementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
         if (_areStringsEqual(kind, "uups")) {
             proxy = payable(address(new ERC1967Proxy(implementation, args)));
@@ -64,115 +56,51 @@ contract BaseScript is CollisionCheck {
         if (!_areStringsEqual(kind, "uups") && !_areStringsEqual(kind, "transparent")) {
             revert("Proxy type not currently supported");
         }
-        _deploymentLogs(proxy, implementation, contractName, block.chainid);
-
-        vm.label(implementation, string.concat("Logic-", contractName));
-        vm.label(proxy, string.concat("Proxy-", contractName));
-
-        return proxy;
     }
 
     /**
      * @dev Utilized in the event of upgrading to new logic.
      */
-    function upgradeTo(address proxy, string memory contractName, string memory kind, bool skip) public {
-        address preComputedAddress = _computeAddressByUpgrader();
+    function upgradeTo(string memory contractName, string memory kind) public returns (address, address) {
+        address proxy = getContractAddress(contractName, block.chainid);
 
-        _deploymentLogs(proxy, preComputedAddress, contractName, block.chainid);
-        _storageLayoutTemp(_getContractLogPath(contractName, block.chainid));
+        console2.log("++++++++PROXY++++++++:", proxy);
+        address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
-        if (skip) {
-            address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
-            if (preComputedAddress != newImplementation) {
-                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
-                revert("Wrong address.");
-            }
-            if (_areStringsEqual(kind, "uups")) {
-                Proxy(proxy).upgradeTo(newImplementation);
-            } else if (_areStringsEqual(kind, "transparent")) {
-                ProxyAdmin(getAdmin()).upgrade(ITransparentUpgradeableProxy(proxy), newImplementation);
-            } else {
-                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
-                revert("Unsupported your kind of proxy.");
-            }
+        if (_areStringsEqual(kind, "uups")) {
+            Proxy(proxy).upgradeTo(newImplementation);
+        } else if (_areStringsEqual(kind, "transparent")) {
+            ProxyAdmin(getAdmin()).upgrade(ITransparentUpgradeableProxy(proxy), newImplementation);
         } else {
-            _diff();
-
-            bool success = _checkForCollision(contractName, block.chainid);
-            // show diff log:
-            if (success) {
-                console2.log("\n==========================", unicode"\nAuto compatibility check: ✅ Passed");
-            } else {
-                console2.log("\n==========================", unicode"\nAuto compatibility check: ❌ Failed");
-            }
-
-            console2.log(
-                "\n==========================",
-                "\nIf you sure storage slot not collision. ",
-                "\nSet assign true to skip variable"
-            );
-
-            _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
+            revert("Unsupported your kind of proxy.");
         }
 
-        _rmrf(_getTemporaryStoragePath(""));
+        return (proxy, newImplementation);
     }
 
     /**
      * @dev Utilized in the event of upgrading to new logic, along with associated data.
      */
     function upgradeToAndCall(
-        address proxy,
         string memory contractName,
         bytes memory data,
-        string memory kind,
-        bool skip
+        string memory kind
     )
         public
+        returns (address, address)
     {
-        address preComputedAddress = _computeAddressByUpgrader();
+        address proxy = getContractAddress(contractName, block.chainid);
+        address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
-        _deploymentLogs(proxy, preComputedAddress, contractName, block.chainid);
-        _storageLayoutTemp(_getContractLogPath(contractName, block.chainid));
-
-        if (skip) {
-            address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
-            if (preComputedAddress != newImplementation) {
-                _rmrf(_getTemporaryStoragePath(""));
-                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
-                revert("Wrong address.");
-            }
-
-            if (_areStringsEqual(kind, "uups")) {
-                Proxy(proxy).upgradeToAndCall(newImplementation, data);
-            } else if (_areStringsEqual(kind, "transparent")) {
-                ProxyAdmin(getAdmin()).upgradeAndCall(ITransparentUpgradeableProxy(proxy), newImplementation, data);
-            } else {
-                _rmrf(_getTemporaryStoragePath(""));
-                _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
-                revert("Unsupported your kind of proxy.");
-            }
+        if (_areStringsEqual(kind, "uups")) {
+            Proxy(proxy).upgradeToAndCall(newImplementation, data);
+        } else if (_areStringsEqual(kind, "transparent")) {
+            ProxyAdmin(getAdmin()).upgradeAndCall(ITransparentUpgradeableProxy(proxy), newImplementation, data);
         } else {
-            _diff();
-
-            bool success = _checkForCollision(contractName, block.chainid);
-            // show diff log:
-            if (success) {
-                console2.log("\n==========================", unicode"\nAuto compatibility check: ✅ Passed");
-            } else {
-                console2.log("\n==========================", unicode"\nAuto compatibility check: ❌ Failed");
-            }
-            console2.log("\n==========================");
-            console2.log(
-                unicode"\n ❗️",
-                "\nIf you sure storage slot not collision. ",
-                "\nAssign the value true to the skip param.",
-                "\n=========================="
-            );
-
-            _overrideNullStorageLayout(_getContractLogPath(contractName, block.chainid));
+            revert("Unsupported your kind of proxy.");
         }
-        _rmrf(_getTemporaryStoragePath(""));
+
+        return (proxy, newImplementation);
     }
 
     function _prefixName(string memory name) internal view returns (string memory) {
@@ -182,8 +110,7 @@ contract BaseScript is CollisionCheck {
         return string.concat(name, ".sol:", name);
     }
 
-    function _computeAddressByUpgrader() internal view returns (address) {
-        address sender = vm.addr(vm.envUint("UPGRADER_PRIVATE_KEY"));
-        return computeCreateAddress(sender, uint256(vm.getNonce(sender)));
+    function _areStringsEqual(string memory firstStr, string memory secondStr) internal pure returns (bool) {
+        return keccak256(abi.encodePacked(firstStr)) == keccak256(abi.encodePacked(secondStr));
     }
 }
