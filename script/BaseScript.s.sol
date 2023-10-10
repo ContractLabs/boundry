@@ -23,7 +23,8 @@ contract BaseScript is Logger {
     /**
      * * @dev Replace the contract file, including the file extension.
      *
-     * ! This must be overridden when your contract name and contract file name do not match.
+     * ! This must be overridden when your contract name and contract file name
+     * do not match.
      */
     function contractFile() public view virtual returns (string memory) { }
 
@@ -35,7 +36,8 @@ contract BaseScript is Logger {
     }
 
     /**
-     * @dev Deploy a proxy contract and return the address of the deployed payable proxy.
+     * @dev Deploy a proxy contract and return the address of the deployed
+     * payable proxy.
      */
     function deployProxyRaw(
         string memory contractName,
@@ -43,10 +45,10 @@ contract BaseScript is Logger {
         string memory kind
     )
         public
-        returns (address implementation, address payable proxy)
+        returns (address payable proxy, address implementation, string memory proxyType)
     {
         implementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
-
+        proxyType = kind;
         if (_areStringsEqual(kind, "uups")) {
             proxy = payable(address(new ERC1967Proxy(implementation, args)));
         }
@@ -61,10 +63,9 @@ contract BaseScript is Logger {
     /**
      * @dev Utilized in the event of upgrading to new logic.
      */
-    function upgradeTo(string memory contractName, string memory kind) public returns (address, address) {
+    function upgradeTo(string memory contractName) public returns (address, address) {
         address proxy = getContractAddress(contractName, block.chainid);
-
-        console2.log("++++++++PROXY++++++++:", proxy);
+        string memory kind = getProxyKind(contractName, block.chainid);
         address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
         if (_areStringsEqual(kind, "uups")) {
@@ -79,17 +80,13 @@ contract BaseScript is Logger {
     }
 
     /**
-     * @dev Utilized in the event of upgrading to new logic, along with associated data.
+     * @dev Utilized in the event of upgrading to new logic, along with
+     * associated data.
      */
-    function upgradeToAndCall(
-        string memory contractName,
-        bytes memory data,
-        string memory kind
-    )
-        public
-        returns (address, address)
-    {
+    function upgradeToAndCall(string memory contractName, bytes memory data) public returns (address, address) {
         address proxy = getContractAddress(contractName, block.chainid);
+        string memory kind = getProxyKind(contractName, block.chainid);
+
         address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
         if (_areStringsEqual(kind, "uups")) {
