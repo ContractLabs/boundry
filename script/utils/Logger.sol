@@ -15,7 +15,7 @@ contract Logger is Script {
         __chainName[1] = "ethereum";
         __chainName[5] = "goerli";
         __chainName[43_113] = "fuji";
-        __chainName[43_113] = "avalanche";
+        __chainName[43_114] = "avalanche";
         __chainName[137] = "polygon";
         __chainName[80_001] = "mumbai";
         __chainName[56] = "bsc";
@@ -24,10 +24,20 @@ contract Logger is Script {
         __chainName[421_613] = "tarb";
     }
 
+    // function run() public {
+    //     console2.log(getProxyKind("CounterUpgradeable", 43113)
+    // }
+
     function getContractAddress(string memory contractName, uint256 chainId) public view returns (address) {
         string memory json = vm.readFile(_getContractPath(contractName, chainId));
         JSONParserLib.Item memory item = json.parse();
         return vm.parseAddress(item.children()[0].value().replace('"', ""));
+    }
+
+    function getProxyKind(string memory contractName, uint256 chainId) public view returns (string memory kind) {
+        string memory json = vm.readFile(_getContractPath(contractName, chainId));
+        JSONParserLib.Item memory item = json.parse();
+        return item.children()[1].value().replace('"', "");
     }
 
     function _getDeploymentsPath(string memory path) internal pure returns (string memory) {
