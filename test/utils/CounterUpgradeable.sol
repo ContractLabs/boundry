@@ -7,8 +7,9 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 contract CounterUpgradeable is Initializable, UUPSUpgradeable {
     struct Admin {
         bool isAdmin;
-        bool isSomethingElse;
-        uint8 id;
+        uint8 isSomethingElse;
+        bool id;
+        uint16 money;
         address walletAddress;
     }
 
@@ -32,7 +33,7 @@ contract CounterUpgradeable is Initializable, UUPSUpgradeable {
     }
 
     function setAdmin(address addr) public {
-        admin = Admin(true, true, 0, addr);
+        admin = Admin(true, 0, true, 0, addr);
     }
 
     function increment() public {

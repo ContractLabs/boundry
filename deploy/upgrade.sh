@@ -7,19 +7,24 @@ upgrade() {
 
     latestStorage=$(jq '.implementations | to_entries | map(.value.storageLayout) | last' $ADDRESSES_FILE)
     upcomingStorage=$(forge inspect $CONTRACT storage)
+    
+    if [ ! -d "./temp" ]; then
+        mkdir -p "./temp"
+        echo "Directory created: ./temp"
+    fi
 
     echo "$latestStorage" > "./temp/latest.json"
     echo "$upcomingStorage" > "./temp/upcoming.json"
 
     echo "Diff between latest and upcoming storage"
     diff --color -u ./temp/latest.json ./temp/upcoming.json
-
-    read  -n 1 -p "Confirm to upgrade:" selection
+    echo "\n"
+    read  -n 1 -p "Confirm to upgrade (y/n): " selection
     echo "\n"
     
     if [ "$selection" = "y" ]; then
         rm -rf ./temp
-        echo "\nUpgrading..."
+        echo "Upgrading..."
         RAW_RETURN_DATA=$(forge script script/Upgrade.s.sol -f $NETWORK -vvvv --json --silent --broadcast --verify)
         RETURN_DATA=$(echo $RAW_RETURN_DATA | jq -r '.returns' 2> /dev/null)
         proxy=$(echo $RETURN_DATA | jq -r '.proxy.value')
