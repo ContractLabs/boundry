@@ -71,7 +71,7 @@ contract BaseScript is Logger {
         if (_areStringsEqual(kind, "uups")) {
             Proxy(proxy).upgradeTo(newImplementation);
         } else if (_areStringsEqual(kind, "transparent")) {
-            ProxyAdmin(getAdmin()).upgrade(ITransparentUpgradeableProxy(proxy), newImplementation);
+            ProxyAdmin(getAdmin()).upgradeAndCall(ITransparentUpgradeableProxy(proxy), newImplementation, _EMPTY_PARAMS);
         } else {
             revert("Unsupported your kind of proxy.");
         }
