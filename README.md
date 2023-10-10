@@ -37,9 +37,6 @@
 </details>
 
 
-
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -97,33 +94,11 @@ Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS
    forge install --no-commit openzeppelin/openzeppelin-contracts
    forge install --no-commit openzeppelin/openzeppelin-contracts-upgradeable
    ```
-3. Script run guide
-   
-   Don't forget run this command first
+3. Run script command:
    ```bash
-   source .env
+   ./deploy/deploy.sh
+   ./deploy/upgrade.sh
    ```
-   Run script command:
-   ```bash
-   forge script script/<script file name>.s.sol --rpc-url $<CHAIN-RPC-URL> --etherscan-api-key $<YOUR-API-KEY> --broadcast --verify --legacy --ffi -vvvv
-   ```
-4. Note
-   
-   Must include option ```--ffi``` in your command run script.
-   
-   Must override ```admin()``` function in your script.
-   ```Solidity
-   function admin() public view override returns (address) {
-      return vm.addr(vm.envUint("YOUR_PRIVATE_KEY"));
-   }
-   ```
-   Must override ```contractFile()``` function if your contract file name and contract name is mismatch.
-   ```Solidity
-   function contractFile() public view override returns (string memory) {
-      return "ERC20.sol";
-   }
-   ```
-
 
 <!-- CONTACT -->
 ## Contact
