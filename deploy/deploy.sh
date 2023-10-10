@@ -5,15 +5,13 @@ deploy() {
     #config script run
 	RAW_RETURN_DATA=$(forge script script/Deploy.s.sol -f $NETWORK -vvvv --json --silent --broadcast --verify)
 	RETURN_DATA=$(echo $RAW_RETURN_DATA | jq -r '.returns' 2> /dev/null)
-
 	deployment=$(echo $RETURN_DATA | jq -r '.deployment.value')
-    if [ -z "$deployment" ]; then
+
+    if [ "$deployment" = "null" ] ; then
         proxy=$(echo $RETURN_DATA | jq -r '.proxy.value')
         implementation=$(echo $RETURN_DATA | jq -r '.implementation.value')
         kind=$(echo $RETURN_DATA | jq -r '.kind.value')
-        if [ -n "$proxy" ] && [ -n "$implementation" ]; then
-            saveProxyContract $NETWORK $CONTRACT $proxy $implementation $kind
-        fi
+        saveProxyContract $NETWORK $CONTRACT $proxy $implementation $kind
 
         echo "\nImplementation deployed at address $implementation"
         echo "\nThe $kind proxy deployed at address $proxy"
@@ -21,8 +19,6 @@ deploy() {
         saveContract $NETWORK $CONTRACT $deployment
         echo "\nContract deployed at address $deployment"
     fi
-
-    
 }
 
 saveContract() {
