@@ -7,8 +7,7 @@ deploy() {
 	RETURN_DATA=$(echo $RAW_RETURN_DATA | jq -r '.returns' 2> /dev/null)
 
 	deployment=$(echo $RETURN_DATA | jq -r '.deployment.value')
-    echo $factory
-    if [ -z "$my_variable" ]; then
+    if [ -z "$deployment" ]; then
         proxy=$(echo $RETURN_DATA | jq -r '.proxy.value')
         implementation=$(echo $RETURN_DATA | jq -r '.implementation.value')
         kind=$(echo $RETURN_DATA | jq -r '.kind.value')
