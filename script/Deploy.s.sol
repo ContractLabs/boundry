@@ -9,7 +9,7 @@ import { CounterUpgradeableV2 } from "test/utils/CounterUpgradeableV2.sol";
 contract DeployScript is BaseScript {
     /**
      * * @dev For non-proxy deployment, the return value must be `address deployment`,
-     * * and for proxy deployment, it should be `address proxy, address implementation`
+     * * and for proxy deployment, it should be `address proxy, address implementation, string memory kind`
      */
     function run() public returns (address proxy, address implementation, string memory kind) {
         vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
