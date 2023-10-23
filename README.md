@@ -31,8 +31,6 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -59,23 +57,15 @@ To get a local copy up and running follow these simple example steps.
    ```
 2. Install dependencies packages
    ```bash
-   sh sh/setup.sh
-   ```
-   or
-   ```bash
    forge install
    ```
-4. Remappings
-   ```bash
-   forge remappings > remappings.txt
-   ```
-   Note: After remappings remember change import path in BaseScript follow your remappings.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
 Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS and Transparent.
 
 1. Example
+  Configure Deploy.s.script
    ```Solidity
    contract CounterScript is BaseScript {
        function run() public {
@@ -85,33 +75,9 @@ Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS
        }
    }
    ```
-2. Dependencies packages recommended 
-   ```bash
-   forge install --no-commit vectorized/solady
-   forge install --no-commit PaulRBerg/prb-math
-   forge install --no-commit foundry-rs/forge-std
-   forge install --no-commit transmissions11/solmate
-   forge install --no-commit openzeppelin/openzeppelin-contracts
-   forge install --no-commit openzeppelin/openzeppelin-contracts-upgradeable
-   ```
-3. Run script command:
+2. Run script command:
    ```bash
    ./deploy/deploy.sh
    ./deploy/upgrade.sh
    ```
 
-<!-- CONTACT -->
-## Contact
-
-tasibii - [@telegram](https://t.me/tasiby) - [@email](mailto:tuanhawork@gmail.com) - [@github](https://github.com/tasibii)
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* [Solidity](https://soliditylang.org/)
-* [Foundry](https://book.getfoundry.sh/)
-* [Bash]()
-
-[Foundry.com]: https://avatars.githubusercontent.com/u/99892494?s=200&v=4
-[Foundry-url]: https://getfoundry.sh/
