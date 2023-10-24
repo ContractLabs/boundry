@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "./BaseScript.s.sol";
-import { Counter } from "test/utils/Counter.sol";
-import { CounterUpgradeable } from "test/utils/CounterUpgradeable.sol";
-import { CounterUpgradeableV2 } from "test/utils/CounterUpgradeableV2.sol";
+import "./migrations/BaseScript.s.sol";
+
+import { Sample, SampleUUPS, SampleTransparent } from "src/Sample.sol";
 
 contract DeployScript is BaseScript {
     /**
@@ -12,23 +11,35 @@ contract DeployScript is BaseScript {
      * * and for proxy deployment, it should be `address proxy, address implementation, string memory kind`
      */
     function run() public returns (address proxy, address implementation, string memory kind) {
+        // returns (address deployment) {
         vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
-        (proxy, implementation, kind) = _deployUUPS();
+        //deployment = _deploySample();
+        (proxy, implementation, kind) = _deployTransparent(); //_deployUUPS();
         vm.stopBroadcast();
     }
 
-    function _deployCounter() internal returns (address deployment) {
-        deployment = deployRaw(type(Counter).name, abi.encode(0));
+    // override because contract name and contract file name are not same
+    function contractFile() public pure override returns (string memory) {
+        return "Sample.sol";
+    }
+
+    // for transparent deployment
+    function getAdmin() public pure override returns (address) {
+        return 0x58f5663cCb305366F584b5f4dF523728D5479396;
+    }
+
+    function _deploySample() internal returns (address deployment) {
+        deployment = deployRaw(type(Sample).name, _EMPTY_PARAMS);
     }
 
     function _deployUUPS() internal returns (address proxy, address implementation, string memory kind) {
         (proxy, implementation, kind) =
-            deployProxyRaw(type(CounterUpgradeable).name, abi.encodeCall(CounterUpgradeable.initialize, 0), "uups");
+            deployProxyRaw(type(SampleUUPS).name, abi.encodeCall(SampleUUPS.initialize, ()), "uups");
     }
 
     function _deployTransparent() internal returns (address proxy, address implementation, string memory kind) {
         (proxy, implementation, kind) = deployProxyRaw(
-            type(CounterUpgradeableV2).name, abi.encodeCall(CounterUpgradeableV2.initialize, 0), "transparent"
+            type(SampleTransparent).name, abi.encodeCall(SampleTransparent.initialize, ()), "transparent"
         );
     }
 }
