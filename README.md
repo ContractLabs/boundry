@@ -87,6 +87,8 @@ Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS
    }
   ```
   More details at [Deploy.s.sol](https://github.com/ContractLabs/template-foundry/blob/main/script/Deploy.s.sol)
+
+  
 2. Run script command:
   Set environment variables
   ```shell
