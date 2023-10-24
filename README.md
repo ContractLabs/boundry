@@ -52,11 +52,11 @@ To get a local copy up and running follow these simple example steps.
 ### Installation
 
 1. Clone the repo
-   ```bash
+   ```shell
    git clone https://github.com/ContractLabs/template-foundry.git
    ```
 2. Install dependencies packages
-   ```bash
+   ```shell
    forge install
    ```
 <!-- USAGE EXAMPLES -->
@@ -65,19 +65,36 @@ To get a local copy up and running follow these simple example steps.
 Use for deploy or upgrade contract. Currently only support 2 type of proxy, UUPS and Transparent.
 
 1. Example
-  Configure Deploy.s.script
-   ```Solidity
-   contract CounterScript is BaseScript {
-       function run() public {
-          vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
-          address deployment = _deployRaw("ERC20", abi.encodeCall(ERC20.initialize, "TokenName", "TokenSymbol"));
+  Deploy non-proxy configuration
+  ```Solidity
+   contract DeployScript is BaseScript {
+      function run() public returns (address deployment) {
+          vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
+          deployment = _deploySample();
           vm.stopBroadcast();
-       }
+      }
    }
-   ```
+  ```
+  Deploy proxy configuration
+  ```Solidity
+   contract DeployScript is BaseScript {
+      function run() public returns (address proxy, address implementation, string memory kind) {
+          vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
+          (proxy, implementation, kind) = _deployTransparent();
+          //(proxy, implementation, kind) = _deployUUPS();
+          vm.stopBroadcast();
+      }
+   }
+  ```
+  More details at [Deploy.s.sol](https://github.com/ContractLabs/template-foundry/blob/main/script/Deploy.s.sol)
 2. Run script command:
-   ```bash
-   ./deploy/deploy.sh
-   ./deploy/upgrade.sh
-   ```
+  Set environment variables
+  ```shell
+  source .env
+  ```
+  Run script example ```./deploy/deploy.sh fuji Sample```
+  ```shell
+   ./deploy/deploy.sh <chain-name> <contract-name>
+   ./deploy/upgrade.sh <chain-name> <contract-name>
+  ```
 
