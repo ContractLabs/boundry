@@ -11,7 +11,6 @@ import {
 } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 interface Proxy {
-    function upgradeTo(address newImplementation) external;
     function upgradeToAndCall(address newImplementation, bytes memory data) external;
 }
 
@@ -69,7 +68,7 @@ contract BaseScript is Logger {
         address newImplementation = deployCode(_prefixName(contractName), _EMPTY_PARAMS);
 
         if (_areStringsEqual(kind, "uups")) {
-            Proxy(proxy).upgradeTo(newImplementation);
+            Proxy(proxy).upgradeToAndCall(newImplementation, _EMPTY_PARAMS);
         } else if (_areStringsEqual(kind, "transparent")) {
             ProxyAdmin(getAdmin()).upgradeAndCall(ITransparentUpgradeableProxy(proxy), newImplementation, _EMPTY_PARAMS);
         } else {
