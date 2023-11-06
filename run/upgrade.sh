@@ -1,6 +1,7 @@
 upgrade() {
     NETWORK=$1
     CONTRACT=$2
+    SCRIPT_PATH=$3
 
     DIR_PATH=./deployments/$NETWORK
 	ADDRESSES_FILE=$DIR_PATH/$CONTRACT.json
@@ -25,7 +26,7 @@ upgrade() {
     if [ "$selection" = "y" ]; then
         rm -rf ./temp
         echo "Upgrading..."
-        RAW_RETURN_DATA=$(forge script script/Upgrade.s.sol -f $NETWORK -vvvv --json --silent --broadcast --verify)
+        RAW_RETURN_DATA=$(forge script $SCRIPT_PATH -f $NETWORK -vvvv --json --silent --broadcast --verify)
         RETURN_DATA=$(echo $RAW_RETURN_DATA | jq -r '.returns' 2> /dev/null)
         proxy=$(echo $RETURN_DATA | jq -r '.proxy.value')
         implementation=$(echo $RETURN_DATA | jq -r '.implementation.value')
@@ -33,7 +34,7 @@ upgrade() {
         echo "\nProxy address: $proxy"
         echo "\nNew implementation deployed at address: $implementation"
     else
-        echo "The upgrade contract process was refused."
+        echo "The upgrade contract process was refused.\n"
     fi
 }
 
