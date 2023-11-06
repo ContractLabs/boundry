@@ -7,10 +7,15 @@ import { Sample, SampleUUPS, SampleTransparent } from "src/Sample.sol";
 
 contract DeployScript is BaseScript {
     /**
-     * * @dev For non-proxy deployment, the return value must be `address deployment`,
-     * * and for proxy deployment, it should be `address proxy, address implementation, string memory kind`
+     * * @dev For non-proxy deployment, the return value must be `address
+     * deployment`,
+     * * and for proxy deployment, it should be `address proxy, address
+     * implementation, string memory kind`
      */
-    function run() public returns (address proxy, address implementation, string memory kind) {
+    function run()
+        public
+        returns (address proxy, address implementation, string memory kind)
+    {
         // returns (address deployment) {
         vm.startBroadcast(vm.envUint("DEPLOYER_PRIVATE_KEY"));
         //deployment = _deploySample();
@@ -32,14 +37,25 @@ contract DeployScript is BaseScript {
         deployment = deployRaw(type(Sample).name, _EMPTY_PARAMS);
     }
 
-    function _deployUUPS() internal returns (address proxy, address implementation, string memory kind) {
-        (proxy, implementation, kind) =
-            deployProxyRaw(type(SampleUUPS).name, abi.encodeCall(SampleUUPS.initialize, ()), "uups");
+    function _deployUUPS()
+        internal
+        returns (address proxy, address implementation, string memory kind)
+    {
+        (proxy, implementation, kind) = deployProxyRaw(
+            type(SampleUUPS).name,
+            abi.encodeCall(SampleUUPS.initialize, ()),
+            "uups"
+        );
     }
 
-    function _deployTransparent() internal returns (address proxy, address implementation, string memory kind) {
+    function _deployTransparent()
+        internal
+        returns (address proxy, address implementation, string memory kind)
+    {
         (proxy, implementation, kind) = deployProxyRaw(
-            type(SampleTransparent).name, abi.encodeCall(SampleTransparent.initialize, ()), "transparent"
+            type(SampleTransparent).name,
+            abi.encodeCall(SampleTransparent.initialize, ()),
+            "transparent"
         );
     }
 }
