@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
-import { Script, console2 } from "forge-std/Script.sol";
-import { ErrorHandler } from "./utils/ErrorHandler.sol";
+import { BaseScript, ErrorHandler } from "./utils/Base.s.sol";
 
-contract Debug is Script {
+contract Debug is BaseScript {
     using ErrorHandler for *;
 
     function debug(
