@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.22;
 
-import "script/utils/BaseDeploy.s.sol";
+import "boundry-deployment-kit/BaseDeploy.s.sol";
 import { Sample, SampleUUPS, SampleTransparent } from "src/Sample.sol";
 
 contract SampleDeploy is BaseDeploy {
-    function _defaultAdmin() internal override returns (address _admin) {
+    function _defaultAdmin() internal pure override returns (address _admin) {
         _admin = 0x58f5663cCb305366F584b5f4dF523728D5479396;
     }
 
