@@ -1,14 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-// forgefmt: disable-start
-import { 
-    Initializable 
-} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { 
-    UUPSUpgradeable 
-} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-// forgefmt: disable-end
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract Sample {
     string public greeting;
@@ -31,7 +25,7 @@ contract SampleUUPS is Initializable, UUPSUpgradeable {
         greeting = "Hello world!";
     }
 
-    function _authorizeUpgrade(address) internal override { }
+    function _authorizeUpgrade(address) internal override {}
 }
 
 contract SampleTransparent is Initializable {

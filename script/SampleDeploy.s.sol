@@ -2,7 +2,7 @@
 pragma solidity ^0.8.22;
 
 import "boundry-deployment-kit/BaseDeploy.s.sol";
-import { Sample, SampleUUPS, SampleTransparent } from "src/Sample.sol";
+import {Sample, SampleUUPS, SampleTransparent} from "src/Sample.sol";
 
 contract SampleDeploy is BaseDeploy {
     function _defaultAdmin() internal pure override returns (address _admin) {
@@ -24,7 +24,8 @@ contract SampleDeploy is BaseDeploy {
     {
         switchKind(Kind.Uups);
         proxy = deployProxyRaw(
-            "Sample.sol:SampleUUPS", abi.encodeCall(SampleUUPS.initialize, ())
+            "Sample.sol:SampleUUPS",
+            abi.encodeCall(SampleUUPS.initialize, ())
         );
     }
 
