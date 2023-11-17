@@ -43,18 +43,20 @@ Please create a `.env` file before deployment. An example can be found in `.env.
 ```
 ./run.sh
 ```
+
+Interacting with the shell
 ```
-<<Which script do you want to run?
+Which script do you want to run?
 >>script/SampleDeploy.s.sol
 
-<<Enter the network to which you want to deploy:
+Enter the network to which you want to deploy:
 >>fuji
 
-<<Enter calldata of target function:
+Enter calldata of target function:
 >>cast calldata 'deploySample()'
 
 
-<<Enter script options, or press enter if none:
+Enter script options, or press enter if none:
 >>[enter]
 ```
 
@@ -67,15 +69,15 @@ Please create a `.env` file before deployment. An example can be found in `.env.
 
 Interacting with the shell
 ```
-<<Which script do you want to run?
+Which script do you want to run?
 >>script/SampleDeploy.s.sol
 
-<<Enter the network to which you want to deploy:
+Enter the network to which you want to deploy:
 >>fuji
 
-<<Enter calldata of target function:
+Enter calldata of target function:
 >>cast calldata 'deploySample()'
 
-<<Enter script options, or press enter if none:
+Enter script options, or press enter if none:
 >>--broadcast --verify
 ```
