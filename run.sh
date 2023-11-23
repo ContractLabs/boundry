@@ -5,7 +5,7 @@ source .env.debug
 echo Which script do you want to run?
 read script
 
-echo Enter the network to which you want to deploy:
+echo Enter the network to which you want to folk:
 read network
 
 # example: cast calldata 'deploySample()'
