@@ -49,7 +49,7 @@ Interacting with the shell
 Which script do you want to run?
 >>script/SampleDeploy.s.sol
 
-Enter the network to which you want to deploy:
+Enter the network to which you want to folk:
 >>fuji
 
 Enter calldata of target function:
@@ -72,7 +72,7 @@ Interacting with the shell
 Which script do you want to run?
 >>script/SampleDeploy.s.sol
 
-Enter the network to which you want to deploy:
+Enter the network to which you want to folk:
 >>fuji
 
 Enter calldata of target function:
