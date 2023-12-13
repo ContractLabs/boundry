@@ -6,8 +6,13 @@
     "[toml]": {
         "editor.defaultFormatter": "tamasfe.even-better-toml",
     },
-    "solidity.formatter": "prettier",
+    "solidity.formatter": "forge",
     "solidity.packageDefaultDependenciesDirectory": "lib",
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
+    "solidity.remappingsUnix": [
+        "forge-std=lib/forge-std/src",
+        "boundry-deployment-kit=lib/boundry-deployment-kit/script",
+        "@openzeppelin/contracts-upgradeable=lib/openzeppelin-contracts-upgradeable/contracts",
+    ],
     "solidity.compileUsingRemoteVersion": "v0.8.23+commit.f704f362",
 }
