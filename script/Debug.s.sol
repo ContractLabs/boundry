@@ -10,7 +10,7 @@ contract Debug is BaseScript {
         if (forkBlock != 0) {
             vm.rollFork(forkBlock);
         }
-        vm.prank(from);
+        vm.prank(from, from);
         (bool success, bytes memory returnOrRevertData) = to.call{ value: value }(callData);
         success.handleRevert(returnOrRevertData);
     }
