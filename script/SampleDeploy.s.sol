@@ -1,31 +1,28 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.23;
+pragma solidity ^0.8.23;
 
-import "boundry-deployment-kit/BaseDeploy.s.sol";
-import { Sample, SampleUUPS, SampleTransparent } from "src/Sample.sol";
+import "./Migrate.s.sol";
+import {Sample, SampleUUPS, SampleTransparent} from "src/Sample.sol";
 
-contract SampleDeploy is BaseDeploy {
-    function _defaultAdmin() internal pure override returns (address _admin) {
-        _admin = 0x58f5663cCb305366F584b5f4dF523728D5479396;
-    }
+contract SampleDeploy is BaseMigrate {
+  function run() external {
+    deploySample();
+    deploySampleUUPS();
+    deploySampleTransparent();
+    _postCheck();
+  }
 
-    function deploySample() external broadcast returns (address payable deployed) {
-        deployed = deployRaw("Sample.sol:Sample", abi.encode());
-    }
+  function deploySample() public broadcast {
+    deployContract("Sample.sol:Sample", abi.encode());
+  }
 
-    function deploySampleUUPS() external broadcast returns (address payable proxy) {
-        switchKind(Kind.Uups);
-        proxy = deployProxyRaw("Sample.sol:SampleUUPS", abi.encodeCall(SampleUUPS.initialize, ()));
-    }
+  function deploySampleUUPS() public broadcast {
+    deployUUPSProxy("Sample.sol:SampleUUPS", abi.encodeCall(SampleUUPS.initialize, ()));
+  }
 
-    function deploySampleTransparent() external broadcast returns (address payable proxy) {
-        switchKind(Kind.Transparent);
-        proxy = deployProxyRaw("Sample.sol:SampleTransparent", abi.encodeCall(SampleTransparent.initialize, ()));
-    }
+  function deploySampleTransparent() public broadcast {
+    deployTransparentProxy("Sample.sol:SampleTransparent", abi.encodeCall(SampleUUPS.initialize, ()));
+  }
 
-    function upgradeContract(address payable proxy) external broadcast {
-        address logic = deployLogic("Sample.sol:SampleUUPS");
-        switchKind(Kind.Uups);
-        upgradeTo(proxy, logic);
-    }
+  function _postCheck() internal pure override log("_postCheck") {}
 }
