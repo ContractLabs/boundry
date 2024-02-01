@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import {BaseScript, ErrorHandler} from "@kit/Base.s.sol";
+import {BaseScript, ErrorHandler} from "../lib/minimal-deployment-kit/script/Base.s.sol";
 
 contract Debug is BaseScript {
   using ErrorHandler for *;
